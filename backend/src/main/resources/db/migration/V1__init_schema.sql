@@ -29,13 +29,14 @@ CREATE TABLE transactions (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   title VARCHAR(255) NOT NULL,
-  amount BIGINT NOT NULL,
-  type VARCHAR(20) NOT NULL,
+  amount BIGINT NOT NULL, -- in centimes
+  type VARCHAR(20) NOT NULL, -- REVENU | DEPENSE
   category_id BIGINT NOT NULL REFERENCES categories(id),
   tx_date DATE NOT NULL,
   description TEXT,
+  is_deleted BOOLEAN DEFAULT FALSE, -- ADDED: Required for Block 2 soft-delete
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT amount_positive CHECK (amount > 0)
+  CONSTRAINT tx_amount_positive CHECK (amount > 0) -- CHANGED: Unique name
 );
 
 -- Budgets
@@ -44,12 +45,12 @@ CREATE TABLE budgets (
   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   category_id BIGINT NOT NULL REFERENCES categories(id),
   budget_year INT NOT NULL,
-  budget_month INT NOT NULL,
-  limit_amount BIGINT NOT NULL,
-  alert_threshold INT DEFAULT 80,
+  budget_month INT NOT NULL, -- 1-12
+  limit_amount BIGINT NOT NULL, -- in centimes
+  alert_threshold INT DEFAULT 80, -- percentage
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT unique_budget UNIQUE (user_id, category_id, budget_year, budget_month),
-  CONSTRAINT limit_positive CHECK (limit_amount > 0)
+  CONSTRAINT budget_limit_positive CHECK (limit_amount > 0) -- CHANGED: Unique name
 );
 
 -- Savings Goals
@@ -57,27 +58,29 @@ CREATE TABLE goals (
   id BIGSERIAL PRIMARY KEY,
   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   title VARCHAR(255) NOT NULL,
-  target_amount BIGINT NOT NULL,
-  current_amount BIGINT DEFAULT 0,
+  target_amount BIGINT NOT NULL, -- in centimes
+  current_amount BIGINT DEFAULT 0, -- in centimes
   target_date DATE NOT NULL,
-  status VARCHAR(20) DEFAULT 'EN_COURS',
+  status VARCHAR(20) DEFAULT 'EN_COURS', -- EN_COURS | ATTEINT | EN_RETARD
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT target_positive CHECK (target_amount > 0),
-  CONSTRAINT target_date_future CHECK (target_date > CURRENT_DATE)
+  CONSTRAINT target_positive CHECK (target_amount > 0)
+  -- REMOVED: target_date_future constraint to allow historical data seeding
 );
 
 -- Goal Contributions
 CREATE TABLE goal_contributions (
   id BIGSERIAL PRIMARY KEY,
   goal_id BIGINT NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
-  amount BIGINT NOT NULL,
+  amount BIGINT NOT NULL, -- in centimes
   contribution_date DATE NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT amount_positive CHECK (amount > 0)
+  CONSTRAINT goal_contrib_amount_positive CHECK (amount > 0) -- CHANGED: Unique name
 );
 
 -- Add indexes for performance
 CREATE INDEX idx_transactions_user ON transactions(user_id);
 CREATE INDEX idx_transactions_date ON transactions(tx_date);
+CREATE INDEX idx_transactions_deleted ON transactions(is_deleted); -- ADDED: For soft-delete performance
 CREATE INDEX idx_budgets_user_month ON budgets(user_id, budget_year, budget_month);
 CREATE INDEX idx_goals_user ON goals(user_id);
+CREATE INDEX idx_categories_user ON categories(user_id); -- ADDED: For faster lookups
