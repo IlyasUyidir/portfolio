@@ -28,19 +28,18 @@
 
 | Layer | Technology | Notes |
 |---|---|---|
-| **Backend** | Spring Boot 3.5.0 (Java 17) | `spring-boot-starter-web`, `spring-boot-starter-data-jpa`, `spring-boot-starter-security`, `spring-boot-starter-validation` |
-| **Database** | PostgreSQL 15+ (Alpine) | Schema managed via Flyway migrations |
-| **Migrations** | Flyway | `V1__init_schema.sql` in `src/main/resources/db/migration/` |
+| **Backend** | Spring Boot 3.x (Java 17) | `spring-boot-starter-web`, `spring-boot-starter-data-jpa` |
+| **Database** | PostgreSQL 15+ | Simple schema, no complex migrations |
 | **ORM** | Hibernate + Spring Data JPA | Standard `@Entity`, `@Repository` |
 | **Security** | Spring Security + JWT | Simple tokens, no refresh tokens (keep it simple) |
-| **Frontend** | React 18 + TypeScript | Functional components + hooks (Vite scaffold) |
+| **Frontend** | React 18 + TypeScript | Functional components + hooks |
 | **State** | React hooks (useState/useContext) | No Redux (skip the complexity) |
-| **Styling** | TailwindCSS v4 | Via `@tailwindcss/vite` plugin, `@import "tailwindcss"` in `index.css` |
+| **Styling** | TailwindCSS | Pre-configured, no shadcn/ui complexity |
 | **Charts** | Recharts | Simple pie/bar charts only |
-| **Export** | Apache POI (Excel) + manual CSV | No iText, no PDF |
+| **Export** | Apache POI (Excel) + manual CSV |
 | **Validation** | Jakarta Bean Validation | Basic `@NotNull`, `@Positive` only |
-| **Build** | Maven 3.9 (backend) + Vite (frontend) | Multi-stage Dockerfiles for both |
-| **Docker** | Docker Compose v3.9 | 3 services: `postgres`, `backend`, `frontend` (no Redis) |
+| **Build** | Maven (backend) + Vite (frontend) | Standard setup |
+| **Docker** | Docker Compose | Postgres + app only  |
 
 ---
 
@@ -53,9 +52,6 @@
 ---
 
 ## DATABASE SCHEMA (PostgreSQL)
-
-> **Note:** This schema is deployed via Flyway migration `V1__init_schema.sql`.
-> Categories table is created before Transactions (FK dependency order).
 
 ```sql
 -- Users
@@ -79,20 +75,9 @@ CREATE TABLE transactions (
   category_id BIGINT NOT NULL REFERENCES categories(id),
   tx_date DATE NOT NULL,
   description TEXT,
-  is_deleted BOOLEAN DEFAULT FALSE, -- soft delete flag
+  is_deleted BOOLEAN DEFAULT FALSE, -- ADDED: Required for Block 2 soft-delete
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT chk_amount_positive CHECK (amount > 0)
-);
-
--- Categories
-CREATE TABLE categories (
-  id BIGSERIAL PRIMARY KEY,
-  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  name VARCHAR(100) NOT NULL,
-  color VARCHAR(7), -- #RRGGBB
-  type VARCHAR(20) NOT NULL, -- REVENU | DEPENSE | BOTH
-  is_system BOOLEAN DEFAULT FALSE, -- system categories cannot be deleted
-  CONSTRAINT unique_user_category UNIQUE (user_id, name)
+  CONSTRAINT tx_amount_positive CHECK (amount > 0) -- CHANGED: Unique name
 );
 
 -- Budgets
@@ -106,7 +91,7 @@ CREATE TABLE budgets (
   alert_threshold INT DEFAULT 80, -- percentage
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT unique_budget UNIQUE (user_id, category_id, budget_year, budget_month),
-  CONSTRAINT chk_limit_positive CHECK (limit_amount > 0)
+  CONSTRAINT budget_limit_positive CHECK (limit_amount > 0) -- CHANGED: Unique name
 );
 
 -- Savings Goals
@@ -119,8 +104,8 @@ CREATE TABLE goals (
   target_date DATE NOT NULL,
   status VARCHAR(20) DEFAULT 'EN_COURS', -- EN_COURS | ATTEINT | EN_RETARD
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT chk_target_positive CHECK (target_amount > 0)
-  -- NOTE: target_date_future constraint removed (breaks historical seeding)
+  CONSTRAINT target_positive CHECK (target_amount > 0)
+  -- REMOVED: target_date_future constraint to allow historical data seeding
 );
 
 -- Goal Contributions
@@ -130,16 +115,16 @@ CREATE TABLE goal_contributions (
   amount BIGINT NOT NULL, -- in centimes
   contribution_date DATE NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT chk_contribution_positive CHECK (amount > 0)
+  CONSTRAINT goal_contrib_amount_positive CHECK (amount > 0) -- CHANGED: Unique name
 );
 
--- Indexes for performance
+-- Add indexes for performance
 CREATE INDEX idx_transactions_user ON transactions(user_id);
 CREATE INDEX idx_transactions_date ON transactions(tx_date);
-CREATE INDEX idx_transactions_deleted ON transactions(is_deleted);
+CREATE INDEX idx_transactions_deleted ON transactions(is_deleted); -- ADDED: For soft-delete performance
 CREATE INDEX idx_budgets_user_month ON budgets(user_id, budget_year, budget_month);
 CREATE INDEX idx_goals_user ON goals(user_id);
-CREATE INDEX idx_categories_user ON categories(user_id);
+CREATE INDEX idx_categories_user ON categories(user_id); -- ADDED: For faster lookups
 ```
 
 ---
@@ -289,11 +274,38 @@ src/
 **Git Branch:** `feature/block-1-auth`
 
 **Gate Checklist** (5 items):
-- [ ] Can register with email/username/password
-- [ ] Can login and receive JWT token
-- [ ] Invalid credentials return 401
-- [ ] Can extract user from token on protected endpoint
-- [ ] Logout works (token blacklist updated)
+- [X] Can register with email/username/password
+- [X] Can login and receive JWT token
+- [X] Invalid credentials return 401
+- [X] Can extract user from token on protected endpoint
+- [X] Logout works (token blacklist updated)
+
+## Test Block 1
+
+# Start (ensure Docker Postgres is running)
+cd backend && ./mvnw spring-boot:run
+
+# Register
+curl -s -X POST http://localhost:8080/api/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"test@test.com","username":"testuser","password":"password123"}' 
+
+# Login
+curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"test@test.com","password":"password123"}'
+
+# /me (paste token from above)
+curl -s http://localhost:8080/api/v1/auth/me \
+  -H "Authorization: Bearer <TOKEN>"
+
+# Logout
+curl -s -X POST http://localhost:8080/api/v1/auth/logout \
+  -H "Authorization: Bearer <TOKEN>"
+
+# Verify logout worked (should 401)
+curl -s http://localhost:8080/api/v1/auth/me \
+  -H "Authorization: Bearer <TOKEN>"
 
 ---
 
@@ -503,36 +515,16 @@ src/
 
 ## ENVIRONMENT VARIABLES
 
-> These are configured in `docker-compose.yml` and overridden via `application.properties` env-var placeholders.
-
 ```env
-# Backend (set in docker-compose.yml → backend.environment)
-SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/portfolio_db   # 'postgres' = Docker service name
+# Backend
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/portfolio_db
 SPRING_DATASOURCE_USERNAME=portfolio_user
 SPRING_DATASOURCE_PASSWORD=secret
-SPRING_JPA_HIBERNATE_DDL_AUTO=validate       # Flyway manages schema; Hibernate only validates
-SPRING_FLYWAY_ENABLED=true
 JWT_SECRET=your-super-secret-key-min-256-bits-long-asdfghjklqwertyuiopzxcvbnm
 JWT_EXPIRATION_MS=86400000
 
-# Frontend (set in frontend/.env + docker-compose.yml)
+# Frontend
 VITE_API_BASE_URL=http://localhost:8080/api/v1
-```
-
-### Docker Compose Services
-
-| Service | Image / Build | Ports | Healthcheck |
-|---|---|---|---|
-| `postgres` | `postgres:15-alpine` | `5432:5432` | `pg_isready` |
-| `backend` | Multi-stage: `maven:3.9-eclipse-temurin-17` → `eclipse-temurin:17-jre-alpine` | `8080:8080` | Depends on postgres healthy |
-| `frontend` | `node:22-alpine` (Vite dev server) | `5173:5173` | Depends on backend |
-
-```bash
-# Start everything
-docker compose up --build
-
-# Stop & clean volumes
-docker compose down -v
 ```
 
 ---
