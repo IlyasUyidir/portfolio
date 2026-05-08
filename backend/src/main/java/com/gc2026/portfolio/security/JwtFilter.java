@@ -45,8 +45,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                // Store userId as request attribute for downstream controllers/services
+                // Store userId and role as request attributes for downstream controllers/services
                 request.setAttribute("userId", userId);
+                request.setAttribute("userRole", role);
             }
         }
 

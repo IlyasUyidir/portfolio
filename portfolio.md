@@ -329,15 +329,47 @@ curl -s http://localhost:8080/api/v1/auth/me \
 **Git Branch:** `feature/block-2-transactions`
 
 **Gate Checklist** (7 items):
-- [ ] Can create transaction with all required fields
-- [ ] Invalid amount (negative, zero) rejected
-- [ ] User can only see own transactions
-- [ ] Pagination works (page=0&size=20)
-- [ ] Filtering by date range works
-- [ ] Standard user hits 500 limit → warning at 400
-- [ ] Delete marks transaction as deleted, doesn't remove from DB
+- [X] Can create transaction with all required fields
+- [X] Invalid amount (negative, zero) rejected
+- [X] User can only see own transactions
+- [X] Pagination works (page=0&size=20)
+- [X] Filtering by date range works
+- [X] Standard user hits 500 limit → warning at 400
+- [X] Delete marks transaction as deleted, doesn't remove from DB
 
 ---
+
+## Test Block 2
+
+# 1. Login to get a token
+curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"test@test.com","password":"password123"}'
+# 2. Create transaction
+curl -s -X POST http://localhost:8080/api/v1/transactions \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Salary","amount":250000,"type":"REVENU","categoryId":1,"txDate":"2026-05-08"}'
+# 3. List transactions (paginated)
+curl -s "http://localhost:8080/api/v1/transactions?page=0&size=20" \
+  -H "Authorization: Bearer $TOKEN"
+# 4. Get by ID
+curl -s http://localhost:8080/api/v1/transactions/1 \
+  -H "Authorization: Bearer $TOKEN"
+# 5. Update
+curl -s -X PUT http://localhost:8080/api/v1/transactions/1 \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Updated Salary","amount":300000,"type":"REVENU","categoryId":1,"txDate":"2026-05-08"}'
+# 6. Delete (soft)
+curl -s -X DELETE http://localhost:8080/api/v1/transactions/1 \
+  -H "Authorization: Bearer $TOKEN"
+# 7. Verify soft-delete (should return 404 or empty list)
+curl -s http://localhost:8080/api/v1/transactions/1 \
+  -H "Authorization: Bearer $TOKEN"
+# 8. Filter tests
+curl -s "http://localhost:8080/api/v1/transactions?startDate=2026-05-01&endDate=2026-05-31&type=REVENU" \
+  -H "Authorization: Bearer $TOKEN"
 
 ### **BLOCK 3: Categories (Hours 17-22)**
 

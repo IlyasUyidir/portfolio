@@ -1,5 +1,6 @@
 package com.gc2026.portfolio.domain.entity;
 
+import com.gc2026.portfolio.domain.enums.CategoryType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,8 +26,9 @@ public class Category {
     @Column(length = 7)
     private String color;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String type;
+    private CategoryType type;
 
     @Column(name = "is_system")
     @Builder.Default

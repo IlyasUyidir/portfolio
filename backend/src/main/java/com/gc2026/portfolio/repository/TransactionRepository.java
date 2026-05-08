@@ -12,4 +12,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
         JpaSpecificationExecutor<Transaction> {
 
     Optional<Transaction> findByIdAndUserIdAndIsDeletedFalse(Long id, Long userId);
+
+    boolean existsByCategoryId(Long categoryId);
 }
