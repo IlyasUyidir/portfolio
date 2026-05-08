@@ -389,13 +389,43 @@ curl -s "http://localhost:8080/api/v1/transactions?startDate=2026-05-01&endDate=
 **Git Branch:** `feature/block-3-categories`
 
 **Gate Checklist** (5 items):
-- [ ] Can create custom category with name, color, type
-- [ ] System categories visible but not editable
-- [ ] Cannot delete category with transactions
-- [ ] Standard user limited to 10 custom categories
-- [ ] Duplicate name rejected per user
+- [X] Can create custom category with name, color, type
+- [X] System categories visible but not editable
+- [X] Cannot delete category with transactions
+- [X] Standard user limited to 10 custom categories
+- [X] Duplicate name rejected per user
 
 ---
+
+## Test Block 3
+
+# Register a NEW user (to test system category seeding)
+curl -s -X POST http://localhost:8080/api/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"cat@test.com","username":"catuser","password":"password123"}'
+# List categories (should see 8 seeded system categories)
+curl -s http://localhost:8080/api/v1/categories \
+  -H "Authorization: Bearer $TOKEN"
+# Create custom category
+curl -s -X POST http://localhost:8080/api/v1/categories \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Épargne","type":"DEPENSE","color":"#10B981"}'
+# Try duplicate name → 400
+curl -s -X POST http://localhost:8080/api/v1/categories \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Épargne","type":"REVENU","color":"#FF0000"}'
+# Update custom category
+curl -s -X PUT http://localhost:8080/api/v1/categories/{id} \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Investissement","type":"REVENU","color":"#3B82F6"}'
+# Try update system category → 400
+curl -s -X PUT http://localhost:8080/api/v1/categories/1 \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Hacked","type":"REVENU","color":"#000000"}'
 
 ### **BLOCK 4: Budgets + Alerts (Hours 23-30)**
 
@@ -415,14 +445,38 @@ curl -s "http://localhost:8080/api/v1/transactions?startDate=2026-05-01&endDate=
 **Git Branch:** `feature/block-4-budgets`
 
 **Gate Checklist** (6 items):
-- [ ] Can create budget for category + month
-- [ ] Spent amount calculated from transactions
-- [ ] Progress endpoint returns: spent %, spent amount, remaining
-- [ ] Alert triggered at 80% threshold (in response)
-- [ ] Cannot create duplicate budget for same category+month
-- [ ] Budget limit cannot be zero or negative
+- [X] Can create budget for category + month
+- [X] Spent amount calculated from transactions
+- [X] Progress endpoint returns: spent %, spent amount, remaining
+- [X] Alert triggered at 80% threshold (in response)
+- [X] Cannot create duplicate budget for same category+month
+- [X] Budget limit cannot be zero or negative
 
 ---
+
+## Test Block 4
+
+# 1. Login to get token 
+curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"cat@test.com","password":"password123"}'
+# 2. Create Budget for category 4
+curl -s -X POST http://localhost:8080/api/v1/budgets \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"categoryId":4,"budgetYear":2026,"budgetMonth":5,"limitAmount":100000}'
+# 3. List Budgets for a month (2026-05)
+curl -s http://localhost:8080/api/v1/budgets/2026-05 \
+  -H "Authorization: Bearer $TOKEN"
+# 4. Create an expense transaction for category 1 to test progress
+curl -s -X POST http://localhost:8080/api/v1/transactions \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Groceries","amount":85000,"type":"DEPENSE","categoryId":1,"txDate":"2026-05-10"}'
+# 5. Check Progress (Assuming the created budget ID = 1)
+# Should reflect 85% spent, which triggers a WARNING alert status.
+curl -s http://localhost:8080/api/v1/budgets/1/progress \
+  -H "Authorization: Bearer $TOKEN"
 
 ### **BLOCK 5: Savings Goals (Hours 31-36)**
 
