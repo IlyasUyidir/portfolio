@@ -8,6 +8,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Transactions } from './pages/Transactions';
 import { TransactionDetailPage } from './pages/TransactionDetailPage';
 import { Budgets } from './pages/Budgets';
+import { Goals } from './pages/Goals';
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/transactions/:id" element={<TransactionDetailPage />} />
             <Route path="/budgets" element={<Budgets />} />
-            <Route path="/goals" element={<div className="p-8">Objectifs Placeholder</div>} />
+            <Route path="/goals" element={<Goals />} />
             <Route path="/categories" element={<div className="p-8">Catégories Placeholder</div>} />
             <Route path="/statistics" element={<div className="p-8">Statistiques Placeholder</div>} />
             <Route path="/export" element={<div className="p-8">Export Placeholder</div>} />

@@ -111,6 +111,11 @@ public class GoalService {
                 .build();
     }
 
+    @Transactional
+    public void deleteGoal(Long id) {
+        goalRepository.deleteById(id);
+    }
+
     private GoalResponse mapToResponse(Goal goal) {
         return GoalResponse.builder()
                 .id(goal.getId())

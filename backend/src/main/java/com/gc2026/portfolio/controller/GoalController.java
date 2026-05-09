@@ -52,4 +52,10 @@ public class GoalController {
         Long userId = (Long) httpRequest.getAttribute("userId");
         return ResponseEntity.ok(goalService.getProgress(userId, id));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGoal(@PathVariable Long id) {
+        goalService.deleteGoal(id);
+        return ResponseEntity.noContent().build();
+    }
 }
