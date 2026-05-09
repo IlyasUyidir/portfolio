@@ -113,7 +113,7 @@ export const Dashboard: React.FC = () => {
               />
               <KpiCard 
                 label="Taux d'épargne" 
-                value={`${kpis?.savingsRate || 0}%`} 
+                value={`${new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 1 }).format(kpis?.savingsRate || 0)} %`} 
                 icon={PiggyBank} 
               />
             </div>

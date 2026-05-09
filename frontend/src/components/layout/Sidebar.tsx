@@ -22,7 +22,6 @@ export const Sidebar: React.FC = () => {
       <div className="p-6">
         <h1 className="text-xl font-bold text-text-primary">
           Portefeuille
-          <span className="text-primary block text-sm">Intelligent</span>
         </h1>
       </div>
 
@@ -36,10 +35,9 @@ export const Sidebar: React.FC = () => {
               key={item.route}
               to={isDisabled ? '#' : item.route}
               className={({ isActive }) =>
-                `flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isDisabled
-                    ? 'opacity-50 cursor-not-allowed text-text-secondary'
-                    : isActive
+                `flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isDisabled
+                  ? 'opacity-50 cursor-not-allowed text-text-secondary'
+                  : isActive
                     ? 'bg-bg-input text-primary'
                     : 'text-text-secondary hover:bg-bg-card hover:text-text-primary'
                 }`
