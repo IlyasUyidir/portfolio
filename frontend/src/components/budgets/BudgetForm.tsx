@@ -35,6 +35,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors }
   } = useForm<BudgetFormData>({
     defaultValues: {
@@ -44,6 +45,8 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       alertThreshold: 80
     }
   });
+
+  const currentThreshold = watch('alertThreshold');
 
   useEffect(() => {
     if (initialData) {
@@ -125,24 +128,18 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
 
             {/* Alert Threshold */}
             <div>
-              <label className="block text-sm font-medium text-text-secondary mb-2">Seuil d'alerte (%)</label>
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min="50"
-                  max="100"
-                  step="5"
-                  {...register('alertThreshold', { valueAsNumber: true })}
-                  className="flex-1 accent-primary"
-                />
-                <input
-                  type="number"
-                  min="50"
-                  max="100"
-                  {...register('alertThreshold', { valueAsNumber: true })}
-                  className="w-20 bg-bg-input border border-border-subtle rounded-lg px-3 py-2 text-center text-text-primary focus:outline-none focus:border-primary"
-                />
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-text-secondary">Seuil d'alerte</label>
+                <span className="text-sm font-bold text-primary">{currentThreshold}%</span>
               </div>
+              <input
+                type="range"
+                min="50"
+                max="100"
+                step="5"
+                {...register('alertThreshold', { valueAsNumber: true })}
+                className="w-full accent-primary"
+              />
               <p className="text-xs text-text-secondary mt-2">Vous serez alerté lorsque vos dépenses atteindront ce pourcentage de la limite.</p>
             </div>
 
