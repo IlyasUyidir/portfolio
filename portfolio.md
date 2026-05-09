@@ -550,15 +550,32 @@ curl -s http://localhost:8080/api/v1/goals/1/progress \
 **Git Branch:** `feature/block-6-dashboard`
 
 **Gate Checklist** (7 items):
-- [ ] Dashboard shows correct KPIs (balance, income, expenses, rate)
-- [ ] Pie chart displays top 8 categories + "Other"
-- [ ] CSV export contains all transactions
-- [ ] Excel export has proper formatting
-- [ ] Premium user can export Excel
-- [ ] Standard user cannot access Excel endpoint
-- [ ] Frontend Dashboard page renders KPIs + chart
+- [X] Dashboard shows correct KPIs (balance, income, expenses, rate)
+- [X] Pie chart displays top 8 categories + "Other"
+- [X] CSV export contains all transactions
+- [X] Excel export has proper formatting
+- [X] Premium user can export Excel
+- [X] Standard user cannot access Excel endpoint
+- [X] Frontend Dashboard page renders KPIs + chart
 
 ---
+
+## Test Block 6
+
+# 1. Login to get token 
+curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"cat@test.com","password":"password123"}'
+# Get KPIs
+curl -s http://localhost:8080/api/v1/dashboard/kpis/2026-05 \
+  -H "Authorization: Bearer $TOKEN"
+# Get Spending
+curl -s http://localhost:8080/api/v1/dashboard/spending \
+  -H "Authorization: Bearer $TOKEN"
+# Download CSV
+curl -s http://localhost:8080/api/v1/export/csv \
+  -H "Authorization: Bearer $TOKEN" -o export.csv
+
 
 ## API ENDPOINTS SUMMARY (25 Total)
 
