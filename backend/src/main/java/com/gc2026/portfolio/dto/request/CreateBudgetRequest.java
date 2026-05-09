@@ -19,4 +19,6 @@ public class CreateBudgetRequest {
     @NotNull(message = "Limit amount is required")
     @Positive(message = "Limit amount must be strictly positive")
     private Long limitAmount;
+
+    private Integer alertThreshold;
 }

@@ -7,6 +7,7 @@ import { ForgotPassword } from './pages/ForgotPassword';
 import { Dashboard } from './pages/Dashboard';
 import { Transactions } from './pages/Transactions';
 import { TransactionDetailPage } from './pages/TransactionDetailPage';
+import { Budgets } from './pages/Budgets';
 
 function App() {
   return (
@@ -26,7 +27,7 @@ function App() {
             {/* Future routes will go here and automatically get the AppShell layout */}
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/transactions/:id" element={<TransactionDetailPage />} />
-            <Route path="/budgets" element={<div className="p-8">Budgets Placeholder</div>} />
+            <Route path="/budgets" element={<Budgets />} />
             <Route path="/goals" element={<div className="p-8">Objectifs Placeholder</div>} />
             <Route path="/categories" element={<div className="p-8">Catégories Placeholder</div>} />
             <Route path="/statistics" element={<div className="p-8">Statistiques Placeholder</div>} />

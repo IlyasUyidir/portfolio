@@ -73,13 +73,11 @@ export interface Budget {
   alertThreshold: number;   // percentage (default 80)
 }
 export interface BudgetProgress {
-  budgetId: number;
-  category: Category;
-  limitAmount: number;
+  budget: Budget;
   spentAmount: number;
   remainingAmount: number;
   spentPercentage: number;
-  alertStatus: 'OK' | 'WARNING' | 'CRITICAL';
+  alertStatus: 'NORMAL' | 'WARNING' | 'CRITICAL';
 }
 export interface CreateBudgetRequest {
   categoryId: number;

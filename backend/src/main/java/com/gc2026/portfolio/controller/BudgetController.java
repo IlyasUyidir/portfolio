@@ -31,7 +31,7 @@ public class BudgetController {
     }
 
     @GetMapping("/{month}")
-    public ResponseEntity<List<BudgetResponse>> getBudgetsByMonth(
+    public ResponseEntity<List<BudgetProgressResponse>> getBudgetsByMonth(
             HttpServletRequest httpRequest,
             @PathVariable String month) {
         Long userId = (Long) httpRequest.getAttribute("userId");
@@ -49,5 +49,14 @@ public class BudgetController {
             @PathVariable Long id) {
         Long userId = (Long) httpRequest.getAttribute("userId");
         return ResponseEntity.ok(budgetService.getProgress(userId, id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBudget(
+            HttpServletRequest httpRequest,
+            @PathVariable Long id) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        budgetService.deleteBudget(userId, id);
+        return ResponseEntity.noContent().build();
     }
 }

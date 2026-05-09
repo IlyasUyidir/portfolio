@@ -49,10 +49,13 @@ public class BudgetService {
         Optional<Budget> existingBudget = budgetRepository.findByUserIdAndCategoryIdAndBudgetYearAndBudgetMonth(
                 userId, category.getId(), request.getBudgetYear(), request.getBudgetMonth());
 
+        Integer threshold = request.getAlertThreshold() != null ? request.getAlertThreshold() : 80;
+
         Budget budget;
         if (existingBudget.isPresent()) {
             budget = existingBudget.get();
             budget.setLimitAmount(request.getLimitAmount());
+            budget.setAlertThreshold(threshold);
         } else {
             budget = Budget.builder()
                     .userId(userId)
@@ -60,7 +63,7 @@ public class BudgetService {
                     .budgetYear(request.getBudgetYear())
                     .budgetMonth(request.getBudgetMonth())
                     .limitAmount(request.getLimitAmount())
-                    .alertThreshold(80)
+                    .alertThreshold(threshold)
                     .build();
         }
 
@@ -69,10 +72,10 @@ public class BudgetService {
     }
 
     @Transactional(readOnly = true)
-    public List<BudgetResponse> getBudgetsByMonth(Long userId, YearMonth month) {
+    public List<BudgetProgressResponse> getBudgetsByMonth(Long userId, YearMonth month) {
         return budgetRepository.findByUserIdAndBudgetYearAndBudgetMonth(userId, month.getYear(), month.getMonthValue())
                 .stream()
-                .map(this::mapToResponse)
+                .map(budget -> calculateProgress(budget, userId))
                 .collect(Collectors.toList());
     }
 
@@ -80,7 +83,17 @@ public class BudgetService {
     public BudgetProgressResponse getProgress(Long userId, Long budgetId) {
         Budget budget = budgetRepository.findByIdAndUserId(budgetId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Budget not found"));
+        return calculateProgress(budget, userId);
+    }
 
+    @Transactional
+    public void deleteBudget(Long userId, Long budgetId) {
+        Budget budget = budgetRepository.findByIdAndUserId(budgetId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Budget not found"));
+        budgetRepository.delete(budget);
+    }
+
+    private BudgetProgressResponse calculateProgress(Budget budget, Long userId) {
         LocalDate startDate = LocalDate.of(budget.getBudgetYear(), budget.getBudgetMonth(), 1);
         LocalDate endDate = YearMonth.of(budget.getBudgetYear(), budget.getBudgetMonth()).atEndOfMonth();
 

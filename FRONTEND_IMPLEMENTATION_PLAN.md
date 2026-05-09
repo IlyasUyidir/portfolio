@@ -969,14 +969,14 @@ export const currentMonth = (): string => {
 8. **EmptyState** — show when no transactions match filters.
 
 **Gate Checklist:**
-- [ ] Transaction list loads with pagination
-- [ ] Filters (type, category, date range) update results correctly
-- [ ] Can create a new transaction (form validates, API call succeeds)
-- [ ] Can edit an existing transaction (pre-filled form)
-- [ ] Delete shows confirmation dialog, then removes from list
-- [ ] Transaction detail page shows all fields
-- [ ] Amount displays correctly (centimes ÷ 100 = DH)
-- [ ] Standard user sees 500-transaction warning banner
+- [X] Transaction list loads with pagination
+- [X] Filters (type, category, date range) update results correctly
+- [X] Can create a new transaction (form validates, API call succeeds)
+- [X] Can edit an existing transaction (pre-filled form)
+- [X] Delete shows confirmation dialog, then removes from list
+- [X] Transaction detail page shows all fields
+- [X] Amount displays correctly (centimes ÷ 100 = DH)
+- [X] Standard user sees 500-transaction warning banner
 
 ---
 

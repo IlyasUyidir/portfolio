@@ -5,13 +5,15 @@ import { TopBar } from '../components/layout/TopBar';
 import { KpiCard } from '../components/ui/KpiCard';
 import { Badge } from '../components/ui/Badge';
 import { PremiumBadge } from '../components/ui/PremiumBadge';
+import { AlertBanner } from '../components/ui/AlertBanner';
 import { SpendingPieChart } from '../components/charts/SpendingPieChart';
 import { RevenueExpensesBar } from '../components/charts/RevenueExpensesBar';
 import { currentMonth, formatDate, formatCurrency } from '../utils';
 import { useAuth } from '../hooks/useAuth';
 import * as dashboardApi from '../api/dashboardApi';
 import * as transactionApi from '../api/transactionApi';
-import type { DashboardKpis, SpendingCategory, Transaction } from '../types';
+import * as budgetApi from '../api/budgetApi';
+import type { DashboardKpis, SpendingCategory, Transaction, BudgetProgress } from '../types';
 
 export const Dashboard: React.FC = () => {
   const { isPremium } = useAuth();
@@ -20,6 +22,7 @@ export const Dashboard: React.FC = () => {
   const [kpis, setKpis] = useState<DashboardKpis | null>(null);
   const [spending, setSpending] = useState<SpendingCategory[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const [budgetAlerts, setBudgetAlerts] = useState<BudgetProgress[]>([]);
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,15 +32,25 @@ export const Dashboard: React.FC = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const [kpiData, spendingData, txData] = await Promise.all([
+        const [kpiData, spendingData, txData, budgetsData] = await Promise.all([
           dashboardApi.getKpis(month),
           dashboardApi.getSpending(),
-          transactionApi.listTransactions({ page: 0, size: 5 })
+          transactionApi.listTransactions({ page: 0, size: 5 }),
+          budgetApi.listBudgetsByMonth(month)
         ]);
         
         setKpis(kpiData);
         setSpending(spendingData);
         setRecentTransactions(txData.content);
+        
+        const activeAlerts = budgetsData.filter(b => b.alertStatus === 'CRITICAL' || b.alertStatus === 'WARNING');
+        // Sort critical first
+        activeAlerts.sort((a, b) => {
+          if (a.alertStatus === 'CRITICAL' && b.alertStatus !== 'CRITICAL') return -1;
+          if (b.alertStatus === 'CRITICAL' && a.alertStatus !== 'CRITICAL') return 1;
+          return 0;
+        });
+        setBudgetAlerts(activeAlerts);
       } catch (err: any) {
         setError(err.response?.data?.error || 'Erreur lors du chargement des données');
       } finally {
@@ -69,6 +82,14 @@ export const Dashboard: React.FC = () => {
       <TopBar title="Tableau de bord" />
 
       <div className="p-8 max-w-7xl mx-auto space-y-8">
+        
+        {budgetAlerts.length > 0 && (
+          <AlertBanner 
+            severity={budgetAlerts[0].alertStatus === 'CRITICAL' ? 'critical' : 'warning'}
+            message={`Alerte ${budgetAlerts[0].alertStatus === 'CRITICAL' ? 'critique' : ''}: Votre budget "${budgetAlerts[0].budget.category.name}" ${budgetAlerts[0].alertStatus === 'CRITICAL' ? 'a dépassé la limite' : `a atteint ${budgetAlerts[0].spentPercentage}% de la limite`}.`}
+            onDismiss={() => setBudgetAlerts(prev => prev.slice(1))}
+          />
+        )}
         
         {/* Month Selector & Header */}
         <div className="flex justify-between items-center">
