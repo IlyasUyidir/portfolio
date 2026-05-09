@@ -6,6 +6,7 @@ import com.gc2026.portfolio.domain.enums.TransactionType;
 import com.gc2026.portfolio.domain.exception.ResourceNotFoundException;
 import com.gc2026.portfolio.dto.request.CreateTransactionRequest;
 import com.gc2026.portfolio.dto.request.UpdateTransactionRequest;
+import com.gc2026.portfolio.dto.response.CategoryResponse;
 import com.gc2026.portfolio.dto.response.TransactionResponse;
 import com.gc2026.portfolio.repository.CategoryRepository;
 import com.gc2026.portfolio.repository.TransactionRepository;
@@ -83,7 +84,7 @@ public class TransactionService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TransactionResponse> list(Long userId,
+    public com.gc2026.portfolio.dto.response.PaginatedResponse<TransactionResponse> list(Long userId,
                                           LocalDate startDate,
                                           LocalDate endDate,
                                           TransactionType type,
@@ -94,17 +95,25 @@ public class TransactionService {
         Specification<Transaction> spec = TransactionSpecification.buildFilter(
                 userId, startDate, endDate, type, categoryId, keyword);
 
-        return transactionRepository.findAll(spec, pageable).map(this::toResponse);
+        Page<TransactionResponse> page = transactionRepository.findAll(spec, pageable).map(this::toResponse);
+        return com.gc2026.portfolio.dto.response.PaginatedResponse.from(page);
     }
 
     private TransactionResponse toResponse(Transaction tx) {
+        CategoryResponse categoryResponse = CategoryResponse.builder()
+                .id(tx.getCategory().getId())
+                .name(tx.getCategory().getName())
+                .color(tx.getCategory().getColor())
+                .type(tx.getCategory().getType().name())
+                .isSystem(tx.getCategory().getIsSystem())
+                .build();
+
         return TransactionResponse.builder()
                 .id(tx.getId())
                 .title(tx.getTitle())
                 .amount(tx.getAmount())
                 .type(tx.getType().name())
-                .categoryId(tx.getCategory().getId())
-                .categoryName(tx.getCategory().getName())
+                .category(categoryResponse)
                 .txDate(tx.getTxDate())
                 .description(tx.getDescription())
                 .createdAt(tx.getCreatedAt())

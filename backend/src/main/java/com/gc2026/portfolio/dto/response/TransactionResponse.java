@@ -18,8 +18,7 @@ public class TransactionResponse {
     private String title;
     private Long amount; // in centimes
     private String type; // "REVENU" | "DEPENSE"
-    private Long categoryId;
-    private String categoryName;
+    private CategoryResponse category;
     private LocalDate txDate;
     private String description;
     private LocalDateTime createdAt;

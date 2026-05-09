@@ -41,7 +41,7 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<TransactionResponse>> list(
+    public ResponseEntity<com.gc2026.portfolio.dto.response.PaginatedResponse<TransactionResponse>> list(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) TransactionType type,
@@ -57,7 +57,7 @@ public class TransactionController {
         int clampedSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Pageable pageable = PageRequest.of(page, clampedSize, Sort.by(Sort.Direction.DESC, "txDate"));
 
-        Page<TransactionResponse> result = transactionService.list(
+        com.gc2026.portfolio.dto.response.PaginatedResponse<TransactionResponse> result = transactionService.list(
                 userId, startDate, endDate, type, categoryId, keyword, pageable);
 
         return ResponseEntity.ok(result);

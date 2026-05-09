@@ -18,10 +18,13 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
 
-    @GetMapping("/kpis/{month}")
+    @GetMapping("/kpis")
     public ResponseEntity<DashboardKpiResponse> getKpis(
             HttpServletRequest httpRequest,
-            @PathVariable YearMonth month) {
+            @RequestParam(required = false) YearMonth month) {
+        if (month == null) {
+            month = YearMonth.now();
+        }
         Long userId = (Long) httpRequest.getAttribute("userId");
         return ResponseEntity.ok(dashboardService.getKpis(userId, month));
     }

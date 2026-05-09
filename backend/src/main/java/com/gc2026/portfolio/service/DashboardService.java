@@ -25,14 +25,23 @@ public class DashboardService {
         LocalDate startDate = month.atDay(1);
         LocalDate endDate = month.atEndOfMonth();
 
-        Long totalIncome = transactionRepository.sumAmountByTypeAndDateRange(userId, TransactionType.REVENU, startDate, endDate);
-        Long totalExpenses = transactionRepository.sumAmountByTypeAndDateRange(userId, TransactionType.DEPENSE, startDate, endDate);
+        // 1. Fetch raw Object Longs (which might be null)
+        Long rawIncome = transactionRepository.sumAmountByTypeAndDateRange(userId, TransactionType.REVENU, startDate,
+                endDate);
+        Long rawExpenses = transactionRepository.sumAmountByTypeAndDateRange(userId, TransactionType.DEPENSE, startDate,
+                endDate);
 
-        Long monthlyBalance = totalIncome - totalExpenses;
-        
-        Double savingsRate = 0.0;
+        // 2. Safely unbox into primitive longs (guaranteed never to be null)
+        long totalIncome = (rawIncome != null) ? rawIncome : 0L;
+        long totalExpenses = (rawExpenses != null) ? rawExpenses : 0L;
+
+        // 3. Math is now 100% safe
+        long monthlyBalance = totalIncome - totalExpenses;
+
+        // 4. Safe division
+        double savingsRate = 0.0;
         if (totalIncome > 0) {
-            savingsRate = ((double) monthlyBalance / totalIncome) * 100.0;
+            savingsRate = ((double) monthlyBalance / (double) totalIncome) * 100.0;
             if (savingsRate < 0) {
                 savingsRate = 0.0;
             }
@@ -59,18 +68,23 @@ public class DashboardService {
             endDate = YearMonth.now().atEndOfMonth();
         }
 
-        List<CategorySpendingProjection> projections = transactionRepository.getTopSpendingCategories(userId, startDate, endDate);
+        List<CategorySpendingProjection> projections = transactionRepository.getTopSpendingCategories(userId, startDate,
+                endDate);
 
         List<CategorySpendingResponse> responses = new ArrayList<>();
-        Long otherAmount = 0L;
+        long otherAmount = 0L; // Use primitive long for safety
 
         for (int i = 0; i < projections.size(); i++) {
             CategorySpendingProjection proj = projections.get(i);
             if (i < 8) {
-                responses.add(CategorySpendingResponse.builder()
-                        .categoryName(proj.getCategoryName())
+                com.gc2026.portfolio.dto.response.CategoryResponse catResp = com.gc2026.portfolio.dto.response.CategoryResponse.builder()
+                        .name(proj.getCategoryName())
                         .color(proj.getColor())
-                        .amount(proj.getTotalAmount())
+                        .build();
+
+                responses.add(CategorySpendingResponse.builder()
+                        .category(catResp)
+                        .totalAmount(proj.getTotalAmount())
                         .build());
             } else {
                 otherAmount += proj.getTotalAmount();
@@ -78,10 +92,14 @@ public class DashboardService {
         }
 
         if (otherAmount > 0) {
-            responses.add(CategorySpendingResponse.builder()
-                    .categoryName("Autre")
+            com.gc2026.portfolio.dto.response.CategoryResponse autreCat = com.gc2026.portfolio.dto.response.CategoryResponse.builder()
+                    .name("Autre")
                     .color("#9CA3AF")
-                    .amount(otherAmount)
+                    .build();
+
+            responses.add(CategorySpendingResponse.builder()
+                    .category(autreCat)
+                    .totalAmount(otherAmount)
                     .build());
         }
 

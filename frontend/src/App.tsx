@@ -20,6 +20,14 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            
+            {/* Future routes will go here and automatically get the AppShell layout */}
+            <Route path="/transactions" element={<div className="p-8">Transactions Placeholder</div>} />
+            <Route path="/budgets" element={<div className="p-8">Budgets Placeholder</div>} />
+            <Route path="/goals" element={<div className="p-8">Objectifs Placeholder</div>} />
+            <Route path="/categories" element={<div className="p-8">Catégories Placeholder</div>} />
+            <Route path="/statistics" element={<div className="p-8">Statistiques Placeholder</div>} />
+            <Route path="/export" element={<div className="p-8">Export Placeholder</div>} />
           </Route>
 
           {/* Fallback */}
