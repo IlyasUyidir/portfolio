@@ -496,14 +496,41 @@ curl -s http://localhost:8080/api/v1/budgets/1/progress \
 **Git Branch:** `feature/block-5-goals`
 
 **Gate Checklist** (6 items):
-- [ ] Can create goal with title, target amount, target date
-- [ ] Can add contributions
-- [ ] Progress calculated as current/target %
-- [ ] Milestones highlighted (25/50/75/100%)
-- [ ] Status auto-changes to ATTEINT when target reached
-- [ ] Standard user limited to 1 active goal
+- [X] Can create goal with title, target amount, target date
+- [X] Can add contributions
+- [X] Progress calculated as current/target %
+- [X] Milestones highlighted (25/50/75/100%)
+- [X] Status auto-changes to ATTEINT when target reached
+- [X] Standard user limited to 1 active goal
 
 ---
+
+## Test Block 5
+
+# 1. Login to get token 
+curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"cat@test.com","password":"password123"}'
+# 2. Create Goal
+curl -s -X POST http://localhost:8080/api/v1/goals \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"New Car","targetAmount":1500000,"targetDate":"2026-12-31"}'
+# 3. Test active goal limit constraint for Standard users
+curl -s -X POST http://localhost:8080/api/v1/goals \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Another Goal","targetAmount":50000,"targetDate":"2026-10-31"}'
+# Expecting a 400 Bad Request / limit reached validation exception.
+# 4. Add Contribution
+curl -s -X POST http://localhost:8080/api/v1/goals/1/contribute \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"amount":500000}'
+# 5. Check Progress
+curl -s http://localhost:8080/api/v1/goals/1/progress \
+  -H "Authorization: Bearer $TOKEN"
+# Should show 33% progress and the 25% milestone set to true.
 
 ### **BLOCK 6: Dashboard + Export (Hours 37-40)**
 
