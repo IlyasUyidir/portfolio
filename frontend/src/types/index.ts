@@ -126,13 +126,13 @@ export interface ContributeRequest {
 
 // ─── Dashboard ─────────────────────────────────────────────────────────────
 export interface DashboardKpis {
-  month: string;            // "2026-06"
+  month?: string;           // "2026-06" (optional since backend doesn't send it)
   monthlyBalance: number;   // centimes
-  totalRevenue: number;     // centimes
+  totalIncome: number;      // centimes
   totalExpenses: number;    // centimes
   savingsRate: number;      // percentage (e.g. 35.4)
-  revenueVsPreviousMonth: number;   // % change
-  expensesVsPreviousMonth: number;  // % change
+  revenueVsPreviousMonth?: number;   // % change (optional, missing in backend)
+  expensesVsPreviousMonth?: number;  // % change (optional, missing in backend)
 }
 export interface SpendingCategory {
   category: Category;

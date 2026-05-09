@@ -874,12 +874,12 @@ export const currentMonth = (): string => {
     logout redirects to `/login`.
 
 **Gate Checklist:**
-- [ ] `npm run dev` starts without errors
-- [ ] Can register a new user
-- [ ] Can login and see `/dashboard` (even if just "Dashboard placeholder")
-- [ ] Invalid credentials show error message under form fields
-- [ ] Unauthenticated visit to `/dashboard` redirects to `/login`
-- [ ] Logout clears token and redirects to `/login`
+- [X] `npm run dev` starts without errors
+- [X] Can register a new user
+- [X] Can login and see `/dashboard` (even if just "Dashboard placeholder")
+- [X] Invalid credentials show error message under form fields
+- [X] Unauthenticated visit to `/dashboard` redirects to `/login`
+- [X] Logout clears token and redirects to `/login`
 
 ---
 
@@ -920,12 +920,12 @@ export const currentMonth = (): string => {
 9. **PremiumBadge** component — yellow pill.
 
 **Gate Checklist:**
-- [ ] Sidebar renders with all nav links
-- [ ] Active page is highlighted in sidebar
-- [ ] Dashboard KPI cards show real numbers from API
-- [ ] Pie chart renders top spending categories with colors
-- [ ] "Voir tout →" link navigates to `/transactions`
-- [ ] PRO badge appears on Statistics nav link for STANDARD users
+- [X] Sidebar renders with all nav links
+- [X] Active page is highlighted in sidebar
+- [X] Dashboard KPI cards show real numbers from API
+- [X] Pie chart renders top spending categories with colors
+- [X] "Voir tout →" link navigates to `/transactions`
+- [X] PRO badge appears on Statistics nav link for STANDARD users
 
 ---
 

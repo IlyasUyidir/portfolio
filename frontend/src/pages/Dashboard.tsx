@@ -57,16 +57,12 @@ export const Dashboard: React.FC = () => {
     { month: 'Mai', revenue: 1650000, expenses: 1250000 },
     { 
       month: 'Juin', 
-      revenue: kpis?.totalRevenue || 0, 
+      revenue: kpis?.totalIncome || 0, 
       expenses: kpis?.totalExpenses || 0 
     },
   ];
 
-  const formatTrend = (value: number) => {
-    if (value > 0) return `+${value}% vs mois préc.`;
-    if (value < 0) return `${value}% vs mois préc.`;
-    return '0% vs mois préc.';
-  };
+
 
   return (
     <div className="min-h-full pb-10">
@@ -101,15 +97,13 @@ export const Dashboard: React.FC = () => {
               />
               <KpiCard 
                 label="Revenus" 
-                value={formatCurrency(kpis?.totalRevenue || 0)} 
+                value={formatCurrency(kpis?.totalIncome || 0)} 
                 icon={TrendingUp} 
-                trend={formatTrend(kpis?.revenueVsPreviousMonth || 0)}
               />
               <KpiCard 
                 label="Dépenses" 
                 value={formatCurrency(kpis?.totalExpenses || 0)} 
                 icon={TrendingDown} 
-                trend={formatTrend(kpis?.expensesVsPreviousMonth || 0)}
               />
               <KpiCard 
                 label="Taux d'épargne" 
