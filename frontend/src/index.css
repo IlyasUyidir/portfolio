@@ -1,11 +1,45 @@
 @import "tailwindcss";
 
-/* ── Base reset ─────────────────────────────────── */
-body {
-  margin: 0;
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@theme {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Background hierarchy */
+  --color-bg-base: #0F1117;
+  --color-bg-card: #1A1D2E;
+  --color-bg-sidebar: #13151F;
+  --color-bg-input: #252836;
+
+  /* Brand / accent */
+  --color-primary: #F5C518;
+  --color-primary-hover: #D4A800;
+
+  /* Status */
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
+  --color-success: #22C55E;
+  --color-info: #3B82F6;
+
+  /* Text */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #9CA3AF;
+  --color-text-muted: #6B7280;
+
+  /* Border */
+  --color-border-subtle: #2A2D3E;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+  }
+
+  /* Scrollbar styling to match dark theme */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--color-bg-card); }
+  ::-webkit-scrollbar-thumb { background: #3A3D50; border-radius: 3px; }
 }
 
 #root {
