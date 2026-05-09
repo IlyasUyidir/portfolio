@@ -140,19 +140,16 @@ export const Dashboard: React.FC = () => {
                 <SpendingPieChart data={spending} />
               </div>
 
-              <div className="bg-bg-card border border-border-subtle rounded-2xl p-6 flex flex-col relative overflow-hidden">
+              <div className={`bg-bg-card border border-border-subtle rounded-2xl p-6 flex flex-col relative overflow-hidden ${!isPremium ? 'opacity-90 grayscale-[0.2]' : ''}`}>
                 <h3 className="text-lg font-bold text-text-primary mb-6">Évolution des flux</h3>
                 <RevenueExpensesBar data={mockedHistoricalData} />
                 
                 {!isPremium && (
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg-card to-bg-card/90 border-t border-border-subtle p-4 flex items-center justify-between backdrop-blur-sm">
-                    <div>
-                      <p className="text-text-primary font-medium flex items-center">
-                        Débloquez l'historique complet <PremiumBadge />
-                      </p>
-                      <p className="text-text-secondary text-sm">Passez à la version Premium pour voir plus de 6 mois.</p>
-                    </div>
-                    <button className="bg-primary hover:bg-primary-hover text-bg-base text-sm font-bold py-2 px-4 rounded-lg transition-colors">
+                  <div className="absolute inset-0 bg-bg-base/40 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-6 text-center">
+                    <PremiumBadge />
+                    <h4 className="text-xl font-bold text-text-primary mt-4 mb-2">Historique complet</h4>
+                    <p className="text-text-secondary text-sm mb-4">Passez à la version Premium pour débloquer et visualiser l'évolution sur plus de 6 mois.</p>
+                    <button className="bg-primary hover:bg-primary-hover text-bg-base text-sm font-bold py-2 px-4 rounded-lg transition-colors mt-2">
                       Mettre à niveau
                     </button>
                   </div>
