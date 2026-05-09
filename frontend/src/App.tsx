@@ -9,6 +9,8 @@ import { Transactions } from './pages/Transactions';
 import { TransactionDetailPage } from './pages/TransactionDetailPage';
 import { Budgets } from './pages/Budgets';
 import { Goals } from './pages/Goals';
+import { Categories } from './pages/Categories';
+import { Export } from './pages/Export';
 
 function App() {
   return (
@@ -30,9 +32,9 @@ function App() {
             <Route path="/transactions/:id" element={<TransactionDetailPage />} />
             <Route path="/budgets" element={<Budgets />} />
             <Route path="/goals" element={<Goals />} />
-            <Route path="/categories" element={<div className="p-8">Catégories Placeholder</div>} />
+            <Route path="/categories" element={<Categories />} />
             <Route path="/statistics" element={<div className="p-8">Statistiques Placeholder</div>} />
-            <Route path="/export" element={<div className="p-8">Export Placeholder</div>} />
+            <Route path="/export" element={<Export />} />
           </Route>
 
           {/* Fallback */}
