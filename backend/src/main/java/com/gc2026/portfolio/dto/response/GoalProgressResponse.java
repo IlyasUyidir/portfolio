@@ -9,5 +9,5 @@ import java.util.Map;
 public class GoalProgressResponse {
     private GoalResponse goal;
     private Integer progressPercentage;
-    private Map<Integer, Boolean> milestones;
+    private MilestonesDto milestones;
 }

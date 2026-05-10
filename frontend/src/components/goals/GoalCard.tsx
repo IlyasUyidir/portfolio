@@ -71,7 +71,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, progress, onContribute
 
             <div className="relative pt-1 pb-4">
               <ProgressBar percent={progress.progressPercentage} status={getStatusForProgressBar()} showLabel={true} />
-              
+
               <div className="absolute top-6 left-0 right-0 flex justify-between px-[5%] -mt-1 pointer-events-none">
                 {milestones.map((m) => (
                   <div

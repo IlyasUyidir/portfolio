@@ -10,6 +10,7 @@ import com.gc2026.portfolio.dto.request.ContributeRequest;
 import com.gc2026.portfolio.dto.request.CreateGoalRequest;
 import com.gc2026.portfolio.dto.response.GoalProgressResponse;
 import com.gc2026.portfolio.dto.response.GoalResponse;
+import com.gc2026.portfolio.dto.response.MilestonesDto;
 import com.gc2026.portfolio.repository.GoalContributionRepository;
 import com.gc2026.portfolio.repository.GoalRepository;
 import lombok.RequiredArgsConstructor;
@@ -98,11 +99,12 @@ public class GoalService {
             progressPercentage = (int) Math.round((double) goal.getCurrentAmount() / goal.getTargetAmount() * 100);
         }
 
-        Map<Integer, Boolean> milestones = new HashMap<>();
-        milestones.put(25, progressPercentage >= 25);
-        milestones.put(50, progressPercentage >= 50);
-        milestones.put(75, progressPercentage >= 75);
-        milestones.put(100, progressPercentage >= 100);
+        MilestonesDto milestones = MilestonesDto.builder()
+                .twentyFive(progressPercentage >= 25)
+                .fifty(progressPercentage >= 50)
+                .seventyFive(progressPercentage >= 75)
+                .hundred(progressPercentage >= 100)
+                .build();
 
         return GoalProgressResponse.builder()
                 .goal(mapToResponse(goal))
