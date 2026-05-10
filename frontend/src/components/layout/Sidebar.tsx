@@ -19,11 +19,11 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside className="w-[220px] bg-bg-sidebar h-full flex flex-col border-r border-border-subtle fixed left-0 top-0">
-      <div className="p-6">
+<div className="p-6 text-center">
         <h1 className="text-xl font-bold text-text-primary">
         Folio.io
         </h1>
-      </div>
+      </div> 
 
       <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
