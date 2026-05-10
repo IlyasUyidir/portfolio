@@ -29,7 +29,7 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse create(Long userId, CreateTransactionRequest dto) {
-        Category category = categoryRepository.findById(dto.getCategoryId())
+        Category category = categoryRepository.findByIdAndUserIdOrSystem(dto.getCategoryId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         Transaction transaction = Transaction.builder()
@@ -52,7 +52,7 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findByIdAndUserIdAndIsDeletedFalse(txId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
 
-        Category category = categoryRepository.findById(dto.getCategoryId())
+        Category category = categoryRepository.findByIdAndUserIdOrSystem(dto.getCategoryId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         transaction.setTitle(dto.getTitle());

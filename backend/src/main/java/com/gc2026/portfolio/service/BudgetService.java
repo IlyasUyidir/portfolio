@@ -39,12 +39,8 @@ public class BudgetService {
             throw new ValidationException("Invalid month");
         }
 
-        Category category = categoryRepository.findById(request.getCategoryId())
+        Category category = categoryRepository.findByIdAndUserIdOrSystem(request.getCategoryId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-
-        if (category.getUserId() != null && !category.getUserId().equals(userId)) {
-            throw new ValidationException("You cannot create a budget for this category");
-        }
 
         Optional<Budget> existingBudget = budgetRepository.findByUserIdAndCategoryIdAndBudgetYearAndBudgetMonth(
                 userId, category.getId(), request.getBudgetYear(), request.getBudgetMonth());
@@ -132,7 +128,7 @@ public class BudgetService {
                         .name(budget.getCategory().getName())
                         .type(budget.getCategory().getType().name())
                         .color(budget.getCategory().getColor())
-                        .isSystem(budget.getCategory().getUserId() == null)
+                        .isSystem(budget.getCategory().getIsSystem())
                         .build())
                 .budgetYear(budget.getBudgetYear())
                 .budgetMonth(budget.getBudgetMonth())

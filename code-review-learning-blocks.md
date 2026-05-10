@@ -17,7 +17,7 @@
 9. [⚡ Block 9 — Stale Closures and Missing `useEffect` Dependencies](#block-9)
 10. [🏷️ Block 10 — `any` Is a Lie You're Telling TypeScript](#block-10)
 11. [🚦 Block 11 — No Rate Limiting on Auth Endpoints](#block-11)
-12. [🗂️ Block 12 — Category Ownership Is Only Half-Validated](#block-12)
+12. X[🗂️ Block 12 — Category Ownership Is Only Half-Validated](#block-12)
 
 ---
 
