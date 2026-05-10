@@ -30,11 +30,6 @@ export const CategoryList: React.FC<CategoryListProps> = ({ categories, onEdit, 
                       style={{ backgroundColor: category.color }}
                     />
                     <span className="font-medium text-text-primary">{category.name}</span>
-                    {category.isSystem && (
-                      <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-border-subtle text-text-secondary">
-                        Système
-                      </span>
-                    )}
                   </div>
                 </td>
                 <td className="py-4 px-6">
@@ -64,9 +59,7 @@ export const CategoryList: React.FC<CategoryListProps> = ({ categories, onEdit, 
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                  ) : (
-                    <span className="text-sm text-text-muted italic">Lecture seule</span>
-                  )}
+                  ) : null}
                 </td>
               </tr>
             ))}
