@@ -7,10 +7,10 @@
 ## Table of Contents
 
 1. [🔐 Block 1 — JWT Stored in `localStorage` (Critical Security Flaw)](#block-1)
-2. [🛡️ Block 2 — Missing Ownership Check on Goal Deletion](#block-2)
-3. [🐛 Block 3 — Frontend/Backend Contract Mismatch (Silent Runtime Bug)](#block-3)
+2. X [🛡️ Block 2 — Missing Ownership Check on Goal Deletion](#block-2)
+3. X [🐛 Block 3 — Frontend/Backend Contract Mismatch (Silent Runtime Bug)](#block-3)
 4. [🧩 Block 4 — Data Fetching Logic Lives Inside Page Components](#block-4)
-5. [💥 Block 5 — No React Error Boundary (Entire App Can Crash)](#block-5)
+5. X [💥 Block 5 — No React Error Boundary (Entire App Can Crash)](#block-5)
 6. [🔑 Block 6 — In-Memory Token Blacklist Is Lost on Restart](#block-6)
 7. [🔒 Block 7 — Secrets in `application.properties`](#block-7)
 8. [✅ Block 8 — Your Test Suite Is Empty (One Test That Does Nothing)](#block-8)

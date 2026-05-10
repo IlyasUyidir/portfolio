@@ -18,12 +18,12 @@ import type { DashboardKpis, SpendingCategory, Transaction, BudgetProgress } fro
 export const Dashboard: React.FC = () => {
   const { isPremium } = useAuth();
   const [month, setMonth] = useState(currentMonth());
-  
+
   const [kpis, setKpis] = useState<DashboardKpis | null>(null);
   const [spending, setSpending] = useState<SpendingCategory[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [budgetAlerts, setBudgetAlerts] = useState<BudgetProgress[]>([]);
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,11 +38,11 @@ export const Dashboard: React.FC = () => {
           transactionApi.listTransactions({ page: 0, size: 5 }),
           budgetApi.listBudgetsByMonth(month)
         ]);
-        
+
         setKpis(kpiData);
         setSpending(spendingData);
         setRecentTransactions(txData.content);
-        
+
         const activeAlerts = budgetsData.filter(b => b.alertStatus === 'CRITICAL' || b.alertStatus === 'WARNING');
         // Sort critical first
         activeAlerts.sort((a, b) => {
@@ -68,10 +68,10 @@ export const Dashboard: React.FC = () => {
     { month: 'Mar', revenue: 1550000, expenses: 1400000 },
     { month: 'Avr', revenue: 1700000, expenses: 1100000 },
     { month: 'Mai', revenue: 1650000, expenses: 1250000 },
-    { 
-      month: 'Juin', 
-      revenue: kpis?.totalIncome || 0, 
-      expenses: kpis?.totalExpenses || 0 
+    {
+      month: 'Juin',
+      revenue: kpis?.totalIncome || 0,
+      expenses: kpis?.totalExpenses || 0
     },
   ];
 
@@ -82,20 +82,20 @@ export const Dashboard: React.FC = () => {
       <TopBar title="Tableau de bord" />
 
       <div className="flex-1 p-8 overflow-y-auto space-y-8">
-        
+
         {budgetAlerts.length > 0 && (
-          <AlertBanner 
+          <AlertBanner
             severity={budgetAlerts[0].alertStatus === 'CRITICAL' ? 'critical' : 'warning'}
             message={`Alerte ${budgetAlerts[0].alertStatus === 'CRITICAL' ? 'critique' : ''}: Votre budget "${budgetAlerts[0].budget.category.name}" ${budgetAlerts[0].alertStatus === 'CRITICAL' ? 'a dépassé la limite' : `a atteint ${budgetAlerts[0].spentPercentage}% de la limite`}.`}
             onDismiss={() => setBudgetAlerts(prev => prev.slice(1))}
           />
         )}
-        
+
         {/* Month Selector & Header */}
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold text-text-primary">Aperçu financier</h2>
-          <input 
-            type="month" 
+          <input
+            type="month"
             value={month}
             onChange={(e) => setMonth(e.target.value)}
             className="bg-bg-input border border-border-subtle rounded-lg px-4 py-2 text-text-primary focus:outline-none focus:border-primary"
@@ -110,26 +110,26 @@ export const Dashboard: React.FC = () => {
           <>
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <KpiCard 
-                label="Solde du mois" 
-                value={formatCurrency(kpis?.monthlyBalance || 0, true)} 
-                icon={Wallet} 
+              <KpiCard
+                label="Solde du mois"
+                value={formatCurrency(kpis?.monthlyBalance || 0, true)}
+                icon={Wallet}
                 valueColor={(kpis?.monthlyBalance || 0) >= 0 ? 'success' : 'danger'}
               />
-              <KpiCard 
-                label="Revenus" 
-                value={formatCurrency(kpis?.totalIncome || 0)} 
-                icon={TrendingUp} 
+              <KpiCard
+                label="Revenus"
+                value={formatCurrency(kpis?.totalIncome || 0)}
+                icon={TrendingUp}
               />
-              <KpiCard 
-                label="Dépenses" 
-                value={formatCurrency(kpis?.totalExpenses || 0)} 
-                icon={TrendingDown} 
+              <KpiCard
+                label="Dépenses"
+                value={formatCurrency(kpis?.totalExpenses || 0)}
+                icon={TrendingDown}
               />
-              <KpiCard 
-                label="Taux d'épargne" 
-                value={`${new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 1 }).format(kpis?.savingsRate || 0)} %`} 
-                icon={PiggyBank} 
+              <KpiCard
+                label="Taux d'épargne"
+                value={`${new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 1 }).format(kpis?.savingsRate || 0)} %`}
+                icon={PiggyBank}
               />
             </div>
 
@@ -143,7 +143,7 @@ export const Dashboard: React.FC = () => {
               <div className={`bg-bg-card border border-border-subtle rounded-2xl p-6 flex flex-col relative overflow-hidden ${!isPremium ? 'opacity-90 grayscale-[0.2]' : ''}`}>
                 <h3 className="text-lg font-bold text-text-primary mb-6">Évolution des flux</h3>
                 <RevenueExpensesBar data={mockedHistoricalData} />
-                
+
                 {!isPremium && (
                   <div className="absolute inset-0 bg-bg-base/40 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-6 text-center">
                     <PremiumBadge />
