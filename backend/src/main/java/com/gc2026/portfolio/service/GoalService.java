@@ -112,8 +112,10 @@ public class GoalService {
     }
 
     @Transactional
-    public void deleteGoal(Long id) {
-        goalRepository.deleteById(id);
+    public void deleteGoal(Long userId, Long id) {
+        Goal goal = goalRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Goal not found"));
+        goalRepository.delete(goal);
     }
 
     private GoalResponse mapToResponse(Goal goal) {

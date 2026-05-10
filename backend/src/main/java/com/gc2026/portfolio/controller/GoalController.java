@@ -54,8 +54,11 @@ public class GoalController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGoal(@PathVariable Long id) {
-        goalService.deleteGoal(id);
+    public ResponseEntity<Void> deleteGoal(
+            HttpServletRequest httpRequest,
+            @PathVariable Long id) {
+        Long userId = (Long) httpRequest.getAttribute("userId");
+        goalService.deleteGoal(userId, id);
         return ResponseEntity.noContent().build();
     }
 }
