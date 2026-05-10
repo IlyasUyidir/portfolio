@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SearchX } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
@@ -39,7 +39,7 @@ export const Transactions: React.FC = () => {
     id: null,
   });
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -53,29 +53,36 @@ export const Transactions: React.FC = () => {
       setTransactions(data.content);
       setTotalPages(data.totalPages);
       setTotalElements(data.totalElements);
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? 'Erreur lors du chargement des transactions');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors du chargement des transactions';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [page, filters, setIsLoading, setError, setTransactions, setTotalPages, setTotalElements]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const data = await listCategories();
       setCategories(data);
     } catch (err) {
       console.error('Failed to load categories', err);
     }
-  };
+  }, [setCategories]);
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    const load = async () => {
+      await fetchCategories();
+    };
+    load();
+  }, [fetchCategories]);
 
   useEffect(() => {
-    fetchTransactions();
-  }, [page, filters]);
+    const load = async () => {
+      await fetchTransactions();
+    };
+    load();
+  }, [fetchTransactions]);
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
@@ -107,8 +114,9 @@ export const Transactions: React.FC = () => {
 
       setIsFormOpen(false);
       fetchTransactions();
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? 'Erreur lors de la sauvegarde');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la sauvegarde';
+      setError(errorMessage);
     }
   };
 
@@ -128,8 +136,9 @@ export const Transactions: React.FC = () => {
         await deleteTransaction(deleteDialog.id);
         setDeleteDialog({ isOpen: false, id: null });
         fetchTransactions();
-      } catch (err: any) {
-        setError(err.response?.data?.error ?? 'Erreur lors de la suppression');
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la suppression';
+        setError(errorMessage);
       }
     }
   };
