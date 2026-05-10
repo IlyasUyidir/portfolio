@@ -1,0 +1,17 @@
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# OS files
+.DS_Store
+
+# Build artifacts
+backend/target/
+frontend/dist/
+frontend/node_modules/

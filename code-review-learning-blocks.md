@@ -12,7 +12,7 @@
 4. [🧩 Block 4 — Data Fetching Logic Lives Inside Page Components](#block-4)
 5. X [💥 Block 5 — No React Error Boundary (Entire App Can Crash)](#block-5)
 6. [🔑 Block 6 — In-Memory Token Blacklist Is Lost on Restart](#block-6)
-7. [🔒 Block 7 — Secrets in `application.properties`](#block-7)
+7. X [🔒 Block 7 — Secrets in `application.properties`](#block-7)
 8. [✅ Block 8 — Your Test Suite Is Empty (One Test That Does Nothing)](#block-8)
 9. [⚡ Block 9 — Stale Closures and Missing `useEffect` Dependencies](#block-9)
 10. [🏷️ Block 10 — `any` Is a Lie You're Telling TypeScript](#block-10)

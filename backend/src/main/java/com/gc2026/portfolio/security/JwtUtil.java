@@ -17,8 +17,14 @@ public class JwtUtil {
     private final long expirationMs;
 
     public JwtUtil(
-            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.secret:#{null}}") String secret,
             @Value("${jwt.expiration-ms}") long expirationMs) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT_SECRET environment variable is missing!");
+        }
+        if (secret.length() < 32) {
+            throw new IllegalStateException("JWT_SECRET must be at least 32 characters long for HS256 security!");
+        }
         this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationMs = expirationMs;
     }
