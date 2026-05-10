@@ -76,10 +76,10 @@ export const TransactionDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
+    <div className="flex-1 flex flex-col h-full bg-bg-base">
       <TopBar title="Détail de transaction" />
 
-      <div className="p-8 w-full space-y-6">
+      <div className="flex-1 p-8 overflow-y-auto space-y-6">
         <button
           onClick={() => navigate('/transactions')}
           className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors w-fit"

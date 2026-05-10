@@ -7,6 +7,7 @@ import { GoalForm } from '../components/goals/GoalForm';
 import { ContributeModal } from '../components/goals/ContributeModal';
 import { PremiumUpsellCard } from '../components/goals/PremiumUpsellCard';
 import { EmptyGoalSlot } from '../components/goals/EmptyGoalSlot';
+import { TopBar } from '../components/layout/TopBar';
 
 export const Goals: React.FC = () => {
   const { isPremium } = useAuth();
@@ -102,59 +103,73 @@ export const Goals: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-text-primary">Mes Objectifs</h1>
-        {isPremium && (
-          <button
-            onClick={() => setIsFormOpen(true)}
-            className="px-4 py-2 rounded-lg font-semibold bg-primary text-bg-base hover:bg-primary-hover transition-colors"
-          >
-            + Nouvel objectif
-          </button>
-        )}
-      </div>
+    <div className="flex-1 flex flex-col h-full bg-bg-base">
+      <TopBar title="Vos objectifs" action={isPremium ? { label: 'Nouvel objectif', onClick: () => setIsFormOpen(true) } : undefined} />
 
-      {error && <div className="text-danger mb-4">{error}</div>}
+      <div className="flex-1 p-8 overflow-y-auto space-y-6">
+        {error && <div className="text-danger mb-4">{error}</div>}
 
-      {/* FREEMIUM LAYOUT */}
-      {!isPremium && (
-        <div className="mb-12">
-          <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-            {/* Slot 1: The Free Slot */}
-            <div className="h-full">
-              {activeGoals.length === 0 ? (
-                <EmptyGoalSlot onClick={() => setIsFormOpen(true)} />
-              ) : (
-                progressMap[activeGoals[0].id] && (
-                  <GoalCard
-                    goal={activeGoals[0]}
-                    progress={progressMap[activeGoals[0].id]}
-                    onContribute={(goalId, title) => setContributeModalState({ isOpen: true, goalId, title })}
-                    onDelete={handleDelete}
-                  />
-                )
-              )}
-            </div>
+        {/* FREEMIUM LAYOUT */}
+        {!isPremium && (
+          <div className="mb-12">
+            <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+              {/* Slot 1: The Free Slot */}
+              <div className="h-full">
+                {activeGoals.length === 0 ? (
+                  <EmptyGoalSlot onClick={() => setIsFormOpen(true)} />
+                ) : (
+                  progressMap[activeGoals[0].id] && (
+                    <GoalCard
+                      goal={activeGoals[0]}
+                      progress={progressMap[activeGoals[0].id]}
+                      onContribute={(goalId, title) => setContributeModalState({ isOpen: true, goalId, title })}
+                      onDelete={handleDelete}
+                    />
+                  )
+                )}
+              </div>
 
-            {/* Slot 2: The Premium Upsell Slot */}
-            <div className="h-full">
-              <PremiumUpsellCard />
+              {/* Slot 2: The Premium Upsell Slot */}
+              <div className="h-full">
+                <PremiumUpsellCard />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* PREMIUM LAYOUT (Grid of active goals) */}
-      {isPremium && (
-        <div className="mb-12">
-          {activeGoals.length === 0 ? (
-            <div className="text-center py-12 text-text-secondary bg-bg-card rounded-xl border border-border-subtle">
-              Aucun objectif en cours.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {activeGoals.map(goal => (
+        {/* PREMIUM LAYOUT (Grid of active goals) */}
+        {isPremium && (
+          <div className="mb-12">
+            {activeGoals.length === 0 ? (
+              <div className="text-center py-12 text-text-secondary bg-bg-card rounded-xl border border-border-subtle">
+                Aucun objectif en cours.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {activeGoals.map(goal => (
+                  progressMap[goal.id] && (
+                    <GoalCard
+                      key={goal.id}
+                      goal={goal}
+                      progress={progressMap[goal.id]}
+                      onContribute={(goalId, title) => setContributeModalState({ isOpen: true, goalId, title })}
+                      onDelete={handleDelete}
+                    />
+                  )
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* HISTORIQUE (Achieved Goals) */}
+        {achievedGoals.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-text-primary mb-4 border-t border-border-subtle pt-6">
+              Historique (Objectifs Atteints)
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 opacity-75">
+              {achievedGoals.map(goal => (
                 progressMap[goal.id] && (
                   <GoalCard
                     key={goal.id}
@@ -166,31 +181,9 @@ export const Goals: React.FC = () => {
                 )
               ))}
             </div>
-          )}
-        </div>
-      )}
-
-      {/* HISTORIQUE (Achieved Goals) */}
-      {achievedGoals.length > 0 && (
-        <div>
-          <h2 className="text-xl font-bold text-text-primary mb-4 border-t border-border-subtle pt-6">
-            Historique (Objectifs Atteints)
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 opacity-75">
-            {achievedGoals.map(goal => (
-              progressMap[goal.id] && (
-                <GoalCard
-                  key={goal.id}
-                  goal={goal}
-                  progress={progressMap[goal.id]}
-                  onContribute={(goalId, title) => setContributeModalState({ isOpen: true, goalId, title })}
-                  onDelete={handleDelete}
-                />
-              )
-            ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Create Goal Modal */}
       {isFormOpen && (

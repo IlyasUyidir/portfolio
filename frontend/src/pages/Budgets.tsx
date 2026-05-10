@@ -107,7 +107,7 @@ export const Budgets: React.FC = () => {
   const warningAlerts = budgets.filter(b => b.alertStatus === 'WARNING');
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
+    <div className="flex-1 flex flex-col h-full bg-bg-base">
       <TopBar 
         title="Budgets" 
         action={{
@@ -119,7 +119,7 @@ export const Budgets: React.FC = () => {
         }}
       />
 
-      <div className="p-8 w-full space-y-8">
+      <div className="flex-1 p-8 overflow-y-auto space-y-8">
         
         {/* Month Selector */}
         <div className="flex justify-between items-center">

@@ -78,10 +78,10 @@ export const Dashboard: React.FC = () => {
 
 
   return (
-    <div className="min-h-full pb-10">
+    <div className="flex-1 flex flex-col h-full bg-bg-base">
       <TopBar title="Tableau de bord" />
 
-      <div className="p-8 space-y-8">
+      <div className="flex-1 p-8 overflow-y-auto space-y-8">
         
         {budgetAlerts.length > 0 && (
           <AlertBanner 
