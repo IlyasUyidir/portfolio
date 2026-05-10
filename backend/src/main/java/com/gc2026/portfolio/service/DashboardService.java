@@ -1,6 +1,7 @@
 package com.gc2026.portfolio.service;
 
 import com.gc2026.portfolio.domain.enums.TransactionType;
+import com.gc2026.portfolio.dto.response.CategoryResponse;
 import com.gc2026.portfolio.dto.response.CategorySpendingResponse;
 import com.gc2026.portfolio.dto.response.DashboardKpiResponse;
 import com.gc2026.portfolio.repository.CategorySpendingProjection;
@@ -77,7 +78,7 @@ public class DashboardService {
         for (int i = 0; i < projections.size(); i++) {
             CategorySpendingProjection proj = projections.get(i);
             if (i < 8) {
-                com.gc2026.portfolio.dto.response.CategoryResponse catResp = com.gc2026.portfolio.dto.response.CategoryResponse.builder()
+                CategoryResponse catResp = CategoryResponse.builder()
                         .name(proj.getCategoryName())
                         .color(proj.getColor())
                         .build();
@@ -92,7 +93,7 @@ public class DashboardService {
         }
 
         if (otherAmount > 0) {
-            com.gc2026.portfolio.dto.response.CategoryResponse autreCat = com.gc2026.portfolio.dto.response.CategoryResponse.builder()
+            CategoryResponse autreCat = CategoryResponse.builder()
                     .name("Autre")
                     .color("#9CA3AF")
                     .build();
