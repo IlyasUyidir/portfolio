@@ -137,7 +137,7 @@ export const Transactions: React.FC = () => {
   const isStandard = user?.role === 'STANDARD';
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
+    <div className="flex flex-col min-h-full pb-10">
       <TopBar
         title="Vos transactions"
         action={{
@@ -150,7 +150,7 @@ export const Transactions: React.FC = () => {
         }}
       />
 
-      <div className="p-8 max-w-7xl mx-auto w-full space-y-6">
+      <div className="p-8 w-full space-y-6">
 
         {/* Limit Warning for STANDARD users */}
         {isStandard && (

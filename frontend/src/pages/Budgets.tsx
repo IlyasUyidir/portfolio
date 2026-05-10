@@ -119,7 +119,7 @@ export const Budgets: React.FC = () => {
         }}
       />
 
-      <div className="p-8 max-w-7xl mx-auto w-full space-y-8">
+      <div className="p-8 w-full space-y-8">
         
         {/* Month Selector */}
         <div className="flex justify-between items-center">

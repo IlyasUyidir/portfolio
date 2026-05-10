@@ -81,7 +81,7 @@ export const Dashboard: React.FC = () => {
     <div className="min-h-full pb-10">
       <TopBar title="Tableau de bord" />
 
-      <div className="p-8 max-w-7xl mx-auto space-y-8">
+      <div className="p-8 space-y-8">
         
         {budgetAlerts.length > 0 && (
           <AlertBanner 
