@@ -21,7 +21,7 @@ export const Sidebar: React.FC = () => {
     <aside className="w-[220px] bg-bg-sidebar h-full flex flex-col border-r border-border-subtle fixed left-0 top-0">
       <div className="p-6">
         <h1 className="text-xl font-bold text-text-primary">
-          Portefeuille
+        Folio.io
         </h1>
       </div>
 
