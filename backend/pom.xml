@@ -94,6 +94,13 @@
 			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!-- Rate Limiting (Bucket4j) -->
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j_jdk17-core</artifactId>
+			<version>8.18.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
