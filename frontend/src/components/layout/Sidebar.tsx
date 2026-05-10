@@ -1,11 +1,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, ArrowLeftRight, PieChart, Target, Tag, BarChart2, Download } from 'lucide-react';
+import { LayoutDashboard, ArrowLeftRight, PieChart, Target, Tag, BarChart2, Download, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { PremiumBadge } from '../ui/PremiumBadge';
 
 export const Sidebar: React.FC = () => {
-  const { user, isPremium } = useAuth();
+  const { user, isPremium, logout } = useAuth();
 
   const navItems = [
     { label: 'Tableau de bord', icon: LayoutDashboard, route: '/dashboard' },
@@ -53,7 +53,7 @@ export const Sidebar: React.FC = () => {
       </nav>
 
       <div className="p-4 border-t border-border-subtle">
-        <div className="flex items-center group cursor-pointer hover:bg-bg-card p-2 rounded-lg transition-colors">
+        <div className="flex items-center group cursor-pointer hover:bg-bg-card p-2 rounded-lg transition-colors mb-2">
           <div className="w-10 h-10 rounded-full bg-bg-input flex items-center justify-center text-primary font-bold mr-3 flex-shrink-0">
             {user?.username.charAt(0).toUpperCase() || 'U'}
           </div>
@@ -66,6 +66,13 @@ export const Sidebar: React.FC = () => {
             </p>
           </div>
         </div>
+        <button
+          onClick={() => logout()}
+          className="w-full flex items-center px-3 py-2 text-sm font-medium text-text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+        >
+          <LogOut className="w-5 h-5 mr-3 flex-shrink-0" />
+          Déconnexion
+        </button>
       </div>
     </aside>
   );
