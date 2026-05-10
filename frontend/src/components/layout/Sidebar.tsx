@@ -1,11 +1,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, ArrowLeftRight, PieChart, Target, Tag, BarChart2, Download } from 'lucide-react';
+import { LayoutDashboard, ArrowLeftRight, PieChart, Target, Tag, BarChart2, Download, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { PremiumBadge } from '../ui/PremiumBadge';
 
 export const Sidebar: React.FC = () => {
-  const { user, isPremium } = useAuth();
+  const { user, isPremium, logout } = useAuth();
 
   const navItems = [
     { label: 'Tableau de bord', icon: LayoutDashboard, route: '/dashboard' },
@@ -66,6 +66,15 @@ export const Sidebar: React.FC = () => {
             </p>
           </div>
         </div>
+        
+        {/* Disconnect Button */}
+        <button 
+          onClick={() => logout()}
+          className="flex items-center w-full px-3 py-2 mt-3 text-sm font-medium text-danger hover:bg-danger/10 rounded-lg transition-colors"
+        >
+          <LogOut className="w-5 h-5 mr-3" />
+          Déconnexion
+        </button>
       </div>
     </aside>
   );
