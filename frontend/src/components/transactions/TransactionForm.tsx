@@ -42,7 +42,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
       title: '',
       amount: '',
       type: 'DEPENSE',
-      categoryId: undefined,
+      categoryId: 0,
       txDate: new Date().toISOString().split('T')[0],
       description: '',
     },
@@ -71,7 +71,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
           title: '',
           amount: '',
           type: 'DEPENSE',
-          categoryId: undefined,
+          categoryId: 0,
           txDate: new Date().toISOString().split('T')[0],
           description: '',
         });
@@ -145,10 +145,11 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
             {/* Titre */}
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-[var(--color-text-secondary)]">
+              <label htmlFor="title" className="block text-sm font-medium text-[var(--color-text-secondary)]">
                 Titre <span className="text-[var(--color-danger)]">*</span>
               </label>
               <input
+                id="title"
                 {...register('title', { required: 'Le titre est requis' })}
                 type="text"
                 placeholder="Ex: Courses Carrefour"
@@ -161,11 +162,12 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
             {/* Montant */}
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-[var(--color-text-secondary)]">
+              <label htmlFor="amount" className="block text-sm font-medium text-[var(--color-text-secondary)]">
                 Montant <span className="text-[var(--color-danger)]">*</span>
               </label>
               <div className="relative">
                 <input
+                  id="amount"
                   {...register('amount', {
                     required: 'Le montant est requis',
                     min: { value: 0.01, message: 'Le montant doit être supérieur à 0' },
@@ -189,10 +191,11 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
             {/* Catégorie */}
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-[var(--color-text-secondary)]">
+              <label htmlFor="categoryId" className="block text-sm font-medium text-[var(--color-text-secondary)]">
                 Catégorie <span className="text-[var(--color-danger)]">*</span>
               </label>
               <select
+                id="categoryId"
                 {...register('categoryId', { 
                   required: 'La catégorie est requise',
                   valueAsNumber: true,
@@ -214,10 +217,11 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
             {/* Date */}
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-[var(--color-text-secondary)]">
+              <label htmlFor="txDate" className="block text-sm font-medium text-[var(--color-text-secondary)]">
                 Date <span className="text-[var(--color-danger)]">*</span>
               </label>
               <input
+                id="txDate"
                 {...register('txDate', { required: 'La date est requise' })}
                 type="date"
                 className={`w-full px-4 py-2 bg-[var(--color-bg-input)] border rounded-lg text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-primary)] transition-colors [color-scheme:dark] ${
@@ -229,10 +233,11 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
             {/* Description */}
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-[var(--color-text-secondary)]">
+              <label htmlFor="description" className="block text-sm font-medium text-[var(--color-text-secondary)]">
                 Description (optionnelle)
               </label>
               <textarea
+                id="description"
                 {...register('description')}
                 rows={3}
                 placeholder="Détails supplémentaires..."
