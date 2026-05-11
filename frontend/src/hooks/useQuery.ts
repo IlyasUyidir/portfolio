@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, DependencyList } from 'react';
+import { useState, useEffect, useCallback, type DependencyList } from 'react';
 
 interface QueryState<T> {
   data: T | null;
