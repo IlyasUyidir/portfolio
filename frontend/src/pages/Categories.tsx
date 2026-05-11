@@ -7,12 +7,11 @@ import { CategoryForm } from '../components/categories/CategoryForm';
 import { TopBar } from '../components/layout/TopBar';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { AlertBanner } from '../components/ui/AlertBanner';
+import { useCategories } from '../hooks/api/useCategories';
+import { useMutation } from '../hooks/useMutation';
 
 export const Categories: React.FC = () => {
   const { isPremium } = useAuth();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -20,22 +19,37 @@ export const Categories: React.FC = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
 
-  const fetchCategories = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await listCategories();
-      setCategories(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? 'Erreur lors du chargement des catégories');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: categoriesData, isLoading, error: fetchError, refetch } = useCategories();
+  const categories = categoriesData ?? [];
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  const { mutate: performSave, error: saveError } = useMutation(
+    async (data: CreateCategoryRequest) => {
+      if (editingCategory) {
+        return await updateCategory(editingCategory.id, data);
+      } else {
+        return await createCategory(data);
+      }
+    },
+    {
+      onSuccess: () => {
+        handleCloseForm();
+        refetch();
+      }
+    }
+  );
+
+  const { mutate: performDelete } = useMutation(
+    async (id: number) => await deleteCategory(id),
+    {
+      onSuccess: () => {
+        setIsDeleteDialogOpen(false);
+        setDeletingCategory(null);
+        refetch();
+      }
+    }
+  );
+
+  const error = fetchError || saveError;
 
   const customCategoriesCount = categories.filter((c) => !c.isSystem).length;
   const isLimitReached = !isPremium && customCategoriesCount >= 10;
@@ -55,17 +69,7 @@ export const Categories: React.FC = () => {
   };
 
   const handleSubmitForm = async (data: CreateCategoryRequest) => {
-    try {
-      if (editingCategory) {
-        await updateCategory(editingCategory.id, data);
-      } else {
-        await createCategory(data);
-      }
-      handleCloseForm();
-      fetchCategories();
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? 'Erreur lors de la sauvegarde de la catégorie');
-    }
+    await performSave(data);
   };
 
   const handleOpenDeleteDialog = (category: Category) => {
@@ -75,14 +79,7 @@ export const Categories: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (!deletingCategory) return;
-    try {
-      await deleteCategory(deletingCategory.id);
-      setIsDeleteDialogOpen(false);
-      setDeletingCategory(null);
-      fetchCategories();
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? 'Erreur lors de la suppression de la catégorie');
-    }
+    await performDelete(deletingCategory.id);
   };
 
   return (

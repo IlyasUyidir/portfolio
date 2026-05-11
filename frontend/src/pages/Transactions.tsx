@@ -9,26 +9,20 @@ import { TransactionForm } from '../components/transactions/TransactionForm';
 import type { TransactionFormData } from '../components/transactions/TransactionForm';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { EmptyState } from '../components/ui/EmptyState';
-import { listTransactions, createTransaction, updateTransaction, deleteTransaction } from '../api/transactionApi';
-import { listCategories } from '../api/categoryApi';
-import type { Transaction, Category } from '../types';
+import { createTransaction, updateTransaction, deleteTransaction } from '../api/transactionApi';
+import type { Transaction } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { toCentimes } from '../utils/formatCurrency';
+import { useTransactions } from '../hooks/api/useTransactions';
+import { useCategories } from '../hooks/api/useCategories';
+import { useMutation } from '../hooks/useMutation';
 
 export const Transactions: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-
   const [filters, setFilters] = useState<FilterState>({});
   const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -39,50 +33,41 @@ export const Transactions: React.FC = () => {
     id: null,
   });
 
-  const fetchTransactions = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await listTransactions({
-        page,
-        size: 10,
-        ...filters,
-        type: filters.type || undefined,
-        categoryId: filters.categoryId || undefined,
-      });
-      setTransactions(data.content);
-      setTotalPages(data.totalPages);
-      setTotalElements(data.totalElements);
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors du chargement des transactions';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
+  const { data, isLoading, error: fetchError, refetch } = useTransactions(filters, page);
+  const transactions = data?.content || [];
+  const totalPages = data?.totalPages || 0;
+  const totalElements = data?.totalElements || 0;
+
+  const { data: categoriesData } = useCategories();
+  const categories = categoriesData ?? [];
+
+  const { mutate: performSave, isLoading: isSaving, error: saveError } = useMutation(
+    async (formData: any) => {
+      if (formMode === 'create') {
+        return await createTransaction(formData);
+      } else if (formMode === 'edit' && transactionToEdit) {
+        return await updateTransaction(transactionToEdit.id, formData);
+      }
+    },
+    {
+      onSuccess: () => {
+        setIsFormOpen(false);
+        refetch();
+      }
     }
-  }, [page, filters, setIsLoading, setError, setTransactions, setTotalPages, setTotalElements]);
+  );
 
-  const fetchCategories = useCallback(async () => {
-    try {
-      const data = await listCategories();
-      setCategories(data);
-    } catch (err) {
-      console.error('Failed to load categories', err);
+  const { mutate: performDelete } = useMutation(
+    async (id: number) => await deleteTransaction(id),
+    {
+      onSuccess: () => {
+        setDeleteDialog({ isOpen: false, id: null });
+        refetch();
+      }
     }
-  }, [setCategories]);
+  );
 
-  useEffect(() => {
-    const load = async () => {
-      await fetchCategories();
-    };
-    load();
-  }, [fetchCategories]);
-
-  useEffect(() => {
-    const load = async () => {
-      await fetchTransactions();
-    };
-    load();
-  }, [fetchTransactions]);
+  const error = fetchError || saveError;
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
@@ -95,29 +80,16 @@ export const Transactions: React.FC = () => {
   };
 
   const handleCreateSubmit = async (data: TransactionFormData) => {
-    try {
-      const amountInCentimes = toCentimes(data.amount);
-      const requestData = {
-        title: data.title,
-        amount: amountInCentimes,
-        type: data.type,
-        categoryId: data.categoryId,
-        txDate: data.txDate,
-        description: data.description,
-      };
-
-      if (formMode === 'create') {
-        await createTransaction(requestData);
-      } else if (formMode === 'edit' && transactionToEdit) {
-        await updateTransaction(transactionToEdit.id, requestData);
-      }
-
-      setIsFormOpen(false);
-      fetchTransactions();
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la sauvegarde';
-      setError(errorMessage);
-    }
+    const amountInCentimes = toCentimes(data.amount);
+    const requestData = {
+      title: data.title,
+      amount: amountInCentimes,
+      type: data.type,
+      categoryId: data.categoryId,
+      txDate: data.txDate,
+      description: data.description,
+    };
+    await performSave(requestData);
   };
 
   const handleEditClick = (transaction: Transaction) => {
@@ -132,14 +104,7 @@ export const Transactions: React.FC = () => {
 
   const confirmDelete = async () => {
     if (deleteDialog.id) {
-      try {
-        await deleteTransaction(deleteDialog.id);
-        setDeleteDialog({ isOpen: false, id: null });
-        fetchTransactions();
-      } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la suppression';
-        setError(errorMessage);
-      }
+      await performDelete(deleteDialog.id);
     }
   };
 

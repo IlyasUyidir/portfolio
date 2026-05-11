@@ -7,71 +7,70 @@ import { TransactionForm } from '../components/transactions/TransactionForm';
 import type { TransactionFormData } from '../components/transactions/TransactionForm';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { getTransaction, updateTransaction, deleteTransaction } from '../api/transactionApi';
-import { listCategories } from '../api/categoryApi';
-import type { Transaction, Category } from '../types';
+import type { Transaction } from '../types';
 import { toCentimes } from '../utils/formatCurrency';
+import { useQuery } from '../hooks/useQuery';
+import { useMutation } from '../hooks/useMutation';
+import { useCategories } from '../hooks/api/useCategories';
 
 export const TransactionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [transaction, setTransaction] = useState<Transaction | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
-  
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        if (!id) throw new Error("ID de transaction manquant");
-        const [txData, catData] = await Promise.all([
-          getTransaction(Number(id)),
-          listCategories()
-        ]);
-        setTransaction(txData);
-        setCategories(catData);
-      } catch (err: any) {
-        setError(err.response?.data?.error ?? 'Erreur lors du chargement de la transaction');
-      } finally {
-        setIsLoading(false);
+  const { data: transaction, isLoading: isTxLoading, error: txError, refetch } = useQuery(
+    async () => {
+      if (!id) throw new Error("ID de transaction manquant");
+      return await getTransaction(Number(id));
+    },
+    [id]
+  );
+
+  const { data: categoriesData } = useCategories();
+  const categories = categoriesData ?? [];
+
+  const { mutate: performUpdate, isLoading: isUpdating, error: updateError } = useMutation(
+    async (formData: TransactionFormData) => {
+      if (!transaction) throw new Error("Transaction non chargée");
+      const amountInCentimes = toCentimes(formData.amount);
+      return await updateTransaction(transaction.id, {
+        title: formData.title,
+        amount: amountInCentimes,
+        type: formData.type,
+        categoryId: formData.categoryId,
+        txDate: formData.txDate,
+        description: formData.description,
+      });
+    },
+    {
+      onSuccess: () => {
+        setIsFormOpen(false);
+        refetch();
       }
-    };
-    fetchData();
-  }, [id]);
+    }
+  );
+
+  const { mutate: performDelete, isLoading: isDeleting, error: deleteError } = useMutation(
+    async (transactionId: number) => {
+      return await deleteTransaction(transactionId);
+    },
+    {
+      onSuccess: () => navigate('/transactions')
+    }
+  );
+
+  const isLoading = isTxLoading || isUpdating || isDeleting;
+  const error = txError || updateError || deleteError;
 
   const handleEditSubmit = async (data: TransactionFormData) => {
-    if (!transaction) return;
-    try {
-      const amountInCentimes = toCentimes(data.amount);
-      const updatedTx = await updateTransaction(transaction.id, {
-        title: data.title,
-        amount: amountInCentimes,
-        type: data.type,
-        categoryId: data.categoryId,
-        txDate: data.txDate,
-        description: data.description,
-      });
-      setTransaction(updatedTx);
-      setIsFormOpen(false);
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? 'Erreur lors de la modification');
-    }
+    await performUpdate(data);
   };
 
   const confirmDelete = async () => {
-    if (!transaction) return;
-    try {
-      await deleteTransaction(transaction.id);
-      navigate('/transactions');
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? 'Erreur lors de la suppression');
-      setIsDeleteDialogOpen(false);
+    if (transaction) {
+      await performDelete(transaction.id);
     }
   };
 

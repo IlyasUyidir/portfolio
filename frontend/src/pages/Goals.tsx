@@ -8,14 +8,11 @@ import { ContributeModal } from '../components/goals/ContributeModal';
 import { PremiumUpsellCard } from '../components/goals/PremiumUpsellCard';
 import { EmptyGoalSlot } from '../components/goals/EmptyGoalSlot';
 import { TopBar } from '../components/layout/TopBar';
+import { useGoals } from '../hooks/api/useGoals';
+import { useMutation } from '../hooks/useMutation';
 
 export const Goals: React.FC = () => {
   const { isPremium } = useAuth();
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [progressMap, setProgressMap] = useState<Record<number, GoalProgress>>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [contributeModalState, setContributeModalState] = useState<{ isOpen: boolean; goalId: number; title: string }>({
     isOpen: false,
@@ -23,79 +20,46 @@ export const Goals: React.FC = () => {
     title: ''
   });
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const fetchedGoals = await listGoals();
-      setGoals(fetchedGoals);
+  const { data, isLoading, error: fetchError, refetch } = useGoals();
+  const goals = data?.goals || [];
+  const progressMap = data?.progressMap || {};
 
-      const progressPromises = fetchedGoals.map(goal =>
-        getGoalProgress(goal.id).then(
-          progress => ({ status: 'fulfilled' as const, value: progress, goalId: goal.id }),
-          err => ({ status: 'rejected' as const, reason: err, goalId: goal.id })
-        )
-      );
-
-      const progressResults = await Promise.all(progressPromises);
-
-      const newProgressMap: Record<number, GoalProgress> = {};
-      const failedGoals: number[] = [];
-
-      progressResults.forEach(result => {
-        if (result.status === 'fulfilled') {
-          newProgressMap[result.goalId] = result.value;
-        } else {
-          failedGoals.push(result.goalId);
-        }
-      });
-
-      setProgressMap(newProgressMap);
-
-      if (failedGoals.length > 0) {
-        setError('Certains objectifs n\'ont pas pu être chargés. Vous pouvez quand même consulter la liste.');
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.error ?? 'Erreur lors du chargement des objectifs');
-    } finally {
-      setIsLoading(false);
+  const { mutate: performCreate } = useMutation(createGoal, {
+    onSuccess: () => {
+      setIsFormOpen(false);
+      refetch();
     }
-  }, []);
+  });
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const { mutate: performContribute } = useMutation(
+    (vars: { goalId: number, amount: number }) => contribute(vars.goalId, { amount: vars.amount }),
+    {
+      onSuccess: () => {
+        setContributeModalState({ isOpen: false, goalId: 0, title: '' });
+        refetch();
+      }
+    }
+  );
+
+  const { mutate: performDelete } = useMutation(deleteGoal, {
+    onSuccess: () => refetch()
+  });
+
+  const error = fetchError || (data?.failedProgressGoalIds.length ? 'Certains objectifs n\'ont pas pu être chargés.' : null);
 
   const activeGoals = goals.filter(g => g.status === 'EN_COURS' || g.status === 'EN_RETARD');
   const achievedGoals = goals.filter(g => g.status === 'ATTEINT');
 
   const handleCreateGoal = async (data: { title: string; targetAmount: number; targetDate: string }) => {
-    try {
-      await createGoal(data);
-      setIsFormOpen(false);
-      fetchData();
-    } catch (err: any) {
-      alert(err.response?.data?.error ?? 'Erreur lors de la création');
-    }
+    await performCreate(data);
   };
 
   const handleContribute = async (amount: string | number) => {
-    try {
-      await contribute(contributeModalState.goalId, { amount: Number(amount) });
-      setContributeModalState({ isOpen: false, goalId: 0, title: '' });
-      fetchData();
-    } catch (err: any) {
-      alert(err.response?.data?.error ?? 'Erreur lors de la contribution');
-    }
+    await performContribute({ goalId: contributeModalState.goalId, amount: Number(amount) });
   };
 
   const handleDelete = async (id: number) => {
-    try {
-      await deleteGoal(id);
-      fetchData();
-    } catch (err: any) {
-      alert(err.response?.data?.error ?? 'Erreur lors de la suppression');
-    }
+    await performDelete(id);
   };
 
   if (isLoading && goals.length === 0) {

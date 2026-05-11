@@ -15,7 +15,7 @@
 7. X [🔒 Block 7 — Secrets in `application.properties`](#block-7)
 8. [✅ Block 8 — Your Test Suite Is Empty (One Test That Does Nothing)](#block-8)
 9. X[⚡ Block 9 — Stale Closures and Missing `useEffect` Dependencies](#block-9)
-10. [🏷️ Block 10 — `any` Is a Lie You're Telling TypeScript](#block-10)
+10. X[🏷️ Block 10 — `any` Is a Lie You're Telling TypeScript](#block-10)
 11. X[🚦 Block 11 — No Rate Limiting on Auth Endpoints](#block-11)
 12. X[🗂️ Block 12 — Category Ownership Is Only Half-Validated](#block-12)
 

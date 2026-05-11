@@ -13,53 +13,26 @@ import { useAuth } from '../hooks/useAuth';
 import * as dashboardApi from '../api/dashboardApi';
 import * as transactionApi from '../api/transactionApi';
 import * as budgetApi from '../api/budgetApi';
+import { useDashboard } from '../hooks/api/useDashboard';
 import type { DashboardKpis, SpendingCategory, Transaction, BudgetProgress } from '../types';
 
 export const Dashboard: React.FC = () => {
   const { isPremium } = useAuth();
   const [month, setMonth] = useState(currentMonth());
 
-  const [kpis, setKpis] = useState<DashboardKpis | null>(null);
-  const [spending, setSpending] = useState<SpendingCategory[]>([]);
-  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const { data, isLoading, error, refetch } = useDashboard(month);
+
+  const kpis = data?.kpis || null;
+  const spending = data?.spending || [];
+  const recentTransactions = data?.recentTransactions || [];
   const [budgetAlerts, setBudgetAlerts] = useState<BudgetProgress[]>([]);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const [kpiData, spendingData, txData, budgetsData] = await Promise.all([
-          dashboardApi.getKpis(month),
-          dashboardApi.getSpending(),
-          transactionApi.listTransactions({ page: 0, size: 5 }),
-          budgetApi.listBudgetsByMonth(month)
-        ]);
+    if (data?.budgetAlerts) {
+      setBudgetAlerts(data.budgetAlerts);
+    }
+  }, [data]);
 
-        setKpis(kpiData);
-        setSpending(spendingData);
-        setRecentTransactions(txData.content);
-
-        const activeAlerts = budgetsData.filter(b => b.alertStatus === 'CRITICAL' || b.alertStatus === 'WARNING');
-        // Sort critical first
-        activeAlerts.sort((a, b) => {
-          if (a.alertStatus === 'CRITICAL' && b.alertStatus !== 'CRITICAL') return -1;
-          if (b.alertStatus === 'CRITICAL' && a.alertStatus !== 'CRITICAL') return 1;
-          return 0;
-        });
-        setBudgetAlerts(activeAlerts);
-      } catch (err: any) {
-        setError(err.response?.data?.error || 'Erreur lors du chargement des données');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, [month]);
 
   // Mock historical data for the bar chart
   const mockedHistoricalData = [

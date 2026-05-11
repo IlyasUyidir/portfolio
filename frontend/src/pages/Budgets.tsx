@@ -7,80 +7,71 @@ import type { BudgetFormData } from '../components/budgets/BudgetForm';
 import { AlertBanner } from '../components/ui/AlertBanner';
 import { EmptyState } from '../components/ui/EmptyState';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
-import { listBudgetsByMonth, createBudget, deleteBudget } from '../api/budgetApi';
-import { listCategories } from '../api/categoryApi';
-import type { BudgetProgress, Category, Budget } from '../types';
 import { toCentimes, formatCurrency } from '../utils/formatCurrency';
+import { useBudgets } from '../hooks/api/useBudgets';
+import { useCategories } from '../hooks/api/useCategories';
+import { useMutation } from '../hooks/useMutation';
+import type { BudgetProgress, Category, Budget } from '../types';
+import { createBudget, deleteBudget } from '../api/budgetApi';
 
 export const Budgets: React.FC = () => {
   const [month, setMonth] = useState(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   });
-  
-  const [budgets, setBudgets] = useState<BudgetProgress[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [budgetToEdit, setBudgetToEdit] = useState<Budget | null>(null);
-  
+
   const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; id: number | null }>({
     isOpen: false,
     id: null
   });
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const [budgetsData, catsData] = await Promise.all([
-        listBudgetsByMonth(month),
-        listCategories()
-      ]);
-      setBudgets(budgetsData);
-      
-      // Only keep DEPENSE or BOTH categories for budgets
-      setCategories(catsData.filter(c => c.type !== 'REVENU'));
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erreur lors du chargement des données');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: budgetsData, isLoading, error: fetchError, refetch } = useBudgets(month);
+  const budgets = budgetsData ?? [];
+  const { data: allCategoriesData } = useCategories();
+  const allCategories = allCategoriesData ?? [];
+  const categories = useMemo(() => allCategories.filter(c => c.type !== 'REVENU'), [allCategories]);
 
-  useEffect(() => {
-    fetchData();
-  }, [month]);
-
-  const handleCreateOrUpdate = async (data: BudgetFormData) => {
-    try {
+  const { mutate: performSave, error: saveError } = useMutation(
+    async (data: BudgetFormData) => {
       const [year, m] = data.monthString.split('-');
-      await createBudget({
+      return await createBudget({
         categoryId: data.categoryId,
         budgetYear: parseInt(year, 10),
         budgetMonth: parseInt(m, 10),
         limitAmount: toCentimes(data.limitAmount),
         alertThreshold: data.alertThreshold
       });
-      setIsFormOpen(false);
-      fetchData();
-    } catch (err: any) {
-      alert(err.response?.data?.error || "Erreur lors de l'enregistrement");
+    },
+    {
+      onSuccess: () => {
+        setIsFormOpen(false);
+        refetch();
+      }
     }
+  );
+
+  const { mutate: performDelete } = useMutation(
+    async (id: number) => await deleteBudget(id),
+    {
+      onSuccess: () => {
+        setDeleteDialog({ isOpen: false, id: null });
+        refetch();
+      }
+    }
+  );
+
+  const error = fetchError || saveError;
+
+  const handleCreateOrUpdate = async (data: BudgetFormData) => {
+    await performSave(data);
   };
 
   const confirmDelete = async () => {
     if (deleteDialog.id) {
-      try {
-        await deleteBudget(deleteDialog.id);
-        setDeleteDialog({ isOpen: false, id: null });
-        fetchData();
-      } catch (err: any) {
-        alert(err.response?.data?.error || "Erreur lors de la suppression");
-      }
+      await performDelete(deleteDialog.id);
     }
   };
 
