@@ -16,8 +16,8 @@ export const Login: React.FC = () => {
     setIsLoading(true);
     setServerError(null);
     try {
-      const response = await authApi.login(data);
-      login(response.token, response.user);
+      const user = await authApi.login(data);
+      login(user);
       navigate('/dashboard');
     } catch (error: any) {
       setServerError(error.response?.data?.error || 'Identifiants incorrects');

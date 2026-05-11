@@ -1,14 +1,13 @@
 import React, { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { UserProfile } from '../types';
-import { getToken, setToken, removeToken } from '../utils/tokenStorage';
 import * as authApi from '../api/authApi';
 
 interface AuthContextValue {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isPremium: boolean;
-  login: (token: string, user: UserProfile) => void;
+  login: (user: UserProfile) => void;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -22,19 +21,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = getToken();
-      if (!token) {
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        return;
-      }
-
       try {
         const userProfile = await authApi.getMe();
         setUser(userProfile);
         setIsAuthenticated(true);
       } catch (error) {
-        removeToken();
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
@@ -44,17 +35,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     initAuth();
   }, []);
 
-  const login = (token: string, userProfile: UserProfile) => {
-    setToken(token);
+  const login = (userProfile: UserProfile) => {
     setUser(userProfile);
     setIsAuthenticated(true);
   };
 
   const logout = async () => {
-    await authApi.logout();
-    removeToken();
-    setUser(null);
-    setIsAuthenticated(false);
+    try {
+      await authApi.logout();
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+    }
   };
 
   const isPremium = user?.role === 'PREMIUM' || user?.role === 'ADMIN';

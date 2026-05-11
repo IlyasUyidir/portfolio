@@ -1,24 +1,19 @@
 import axios from 'axios';
-import { getToken, removeToken } from '../utils/tokenStorage';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1',
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 });
 
-// Attach JWT to every request automatically
-apiClient.interceptors.request.use((config) => {
-  const token = getToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-// Global error handling: 401 → clear token and redirect to /login
+// Global error handling: 401 → redirect to /login
 apiClient.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
-      removeToken();
+      // Note: We don't manually remove the token from localStorage anymore
+      // The browser handles the cookie. We just need to ensure the UI state is updated.
+      // This redirect will trigger a re-render/re-check in AuthContext if needed.
       window.location.href = '/login';
     }
     return Promise.reject(error);

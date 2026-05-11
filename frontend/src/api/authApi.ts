@@ -1,13 +1,13 @@
 import apiClient from './apiClient';
-import type { RegisterRequest, LoginRequest, AuthResponse, UserProfile } from '../types';
+import type { RegisterRequest, LoginRequest, UserProfile } from '../types';
 
-export const register = async (data: RegisterRequest): Promise<AuthResponse> => {
-  const response = await apiClient.post<AuthResponse>('/auth/register', data);
+export const register = async (data: RegisterRequest): Promise<UserProfile> => {
+  const response = await apiClient.post<UserProfile>('/auth/register', data);
   return response.data;
 };
 
-export const login = async (data: LoginRequest): Promise<AuthResponse> => {
-  const response = await apiClient.post<AuthResponse>('/auth/login', data);
+export const login = async (data: LoginRequest): Promise<UserProfile> => {
+  const response = await apiClient.post<UserProfile>('/auth/login', data);
   return response.data;
 };
 

@@ -23,8 +23,8 @@ export const Register: React.FC = () => {
         username: data.username,
         password: data.password,
       };
-      const response = await authApi.register(payload);
-      login(response.token, response.user);
+      const user = await authApi.register(payload);
+      login(user);
       navigate('/dashboard');
     } catch (error: any) {
       setServerError(error.response?.data?.error || 'Erreur lors de la création du compte');
