@@ -30,7 +30,7 @@ export const Login: React.FC = () => {
     <div className="flex h-screen w-full bg-bg-base">
       {/* Left Panel */}
       <div className="hidden lg:flex flex-col justify-center items-center w-1/2 bg-bg-sidebar p-12 text-center border-r border-border-subtle">
-        <h1 className="text-4xl font-bold text-text-primary mb-4">Portefeuille <span className="text-primary">Intelligent</span></h1>
+        <h1 className="text-4xl font-bold text-text-primary mb-4">Folio.io</h1>
         <p className="text-text-secondary text-lg max-w-md">Gérez vos finances personnelles en toute simplicité et atteignez vos objectifs.</p>
       </div>
 
@@ -40,9 +40,9 @@ export const Login: React.FC = () => {
           <div className="lg:hidden mb-8 text-center">
             <h1 className="text-3xl font-bold text-text-primary">Portefeuille <span className="text-primary">Intelligent</span></h1>
           </div>
-          
+
           <h2 className="text-2xl font-bold text-text-primary mb-6 text-center">Se connecter</h2>
-          
+
           {serverError && (
             <div className="bg-danger/10 text-danger p-3 rounded-lg mb-6 text-sm text-center">
               {serverError}
@@ -95,7 +95,7 @@ export const Login: React.FC = () => {
             className="w-full mt-6 bg-transparent border border-border-subtle text-text-primary hover:bg-bg-input py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+              <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
             </svg>
             Continuer avec Google
           </button>

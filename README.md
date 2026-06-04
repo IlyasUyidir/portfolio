@@ -419,18 +419,23 @@ The test suite includes:
 
 ## Screenshots
 
-> Add screenshots here after capturing them. Suggested shots:
->
-> 1. **Login page** — `/login`
+1. **Login page** — `/login`
+   ![Login Page](frontend/src/assets/login.png)
 
-> 2. **Dashboard** — KPI cards + spending pie chart
+2. **Dashboard** — KPI cards + spending pie chart
+   ![Dashboard](frontend/src/assets/dashboard.png)
 
-> 3. **Transactions list** — table with filters
+3. **Transactions list** — table with filters
+   ![Transactions List](frontend/src/assets/transactions.png)
 
-> 4. **Budgets page** — budget
+4. **Budgets page** — budget
+   ![Budgets Page](frontend/src/assets/budgets.png)
 
-> 5. **Objectif page** — Objectif
+5. **Objectif page** — Objectif
+   ![Objectif Page](frontend/src/assets/objectif.png)
 
-> 6. **Category page** — Category
+6. **Category page** — Category
+   ![Category Page](frontend/src/assets/category.png)
 
-> 7. **Import/export page**
+7. **Import/export page**
+   ![Import Export Page](frontend/src/assets/import.png)
