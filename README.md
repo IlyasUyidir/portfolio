@@ -419,23 +419,30 @@ The test suite includes:
 
 ## Screenshots
 
-1. **Login page** — `/login`
-   ![Login Page](frontend/src/assets/login.png)
+### Login
 
-2. **Dashboard** — KPI cards + spending pie chart
-   ![Dashboard](frontend/src/assets/dashboard.png)
+![Login](screenshots/login.png)
 
-3. **Transactions list** — table with filters
-   ![Transactions List](frontend/src/assets/transactions.png)
+### Dashboard
 
-4. **Budgets page** — budget
-   ![Budgets Page](frontend/src/assets/budgets.png)
+![Dashboard](screenshots/dashboard.png)
 
-5. **Objectif page** — Objectif
-   ![Objectif Page](frontend/src/assets/objectif.png)
+### Transactions
 
-6. **Category page** — Category
-   ![Category Page](frontend/src/assets/category.png)
+![Transactions](screenshots/transactions.png)
 
-7. **Import/export page**
-   ![Import Export Page](frontend/src/assets/import.png)
+### Budgets
+
+![Budgets](screenshots/budgets.png)
+
+### Goals
+
+![Goals](screenshots/goals.png)
+
+### Categories
+
+![Categories](screenshots/categories.png)
+
+### Export
+
+![Export](screenshots/export.png)
