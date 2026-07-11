@@ -1,6 +1,5 @@
 import { useQuery } from '../useQuery';
 import { listTransactions } from '../../api/transactionApi';
-import type { Transaction } from '../../types';
 import type { FilterState } from '../../components/transactions/TransactionFilters';
 
 export const useTransactions = (filters: FilterState, page: number, size: number = 10) => {

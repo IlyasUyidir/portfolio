@@ -60,7 +60,7 @@ describe('useQuery', () => {
   // 5. Dependency change refetch
   it('useQuery_whenDepsChange_shouldRefetch', async () => {
     const fetcher = vi.fn().mockResolvedValue('data');
-    const { result, rerender } = renderHook(
+    const { rerender } = renderHook(
       ({ id }) => useQuery(() => fetcher(id), [id]), 
       { initialProps: { id: 1 } }
     );

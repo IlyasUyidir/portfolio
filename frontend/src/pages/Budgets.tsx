@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, {useState, useMemo } from 'react';
 import { Target } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
 import { BudgetCard } from '../components/budgets/BudgetCard';
@@ -11,7 +11,7 @@ import { toCentimes, formatCurrency } from '../utils/formatCurrency';
 import { useBudgets } from '../hooks/api/useBudgets';
 import { useCategories } from '../hooks/api/useCategories';
 import { useMutation } from '../hooks/useMutation';
-import type { BudgetProgress, Category, Budget } from '../types';
+import type { Budget } from '../types';
 import { createBudget, deleteBudget } from '../api/budgetApi';
 
 export const Budgets: React.FC = () => {

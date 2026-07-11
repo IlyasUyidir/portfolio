@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
@@ -7,7 +7,6 @@ import { TransactionForm } from '../components/transactions/TransactionForm';
 import type { TransactionFormData } from '../components/transactions/TransactionForm';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { getTransaction, updateTransaction, deleteTransaction } from '../api/transactionApi';
-import type { Transaction } from '../types';
 import { toCentimes } from '../utils/formatCurrency';
 import { useQuery } from '../hooks/useQuery';
 import { useMutation } from '../hooks/useMutation';

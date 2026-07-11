@@ -63,7 +63,6 @@ describe('TransactionForm', () => {
 
   it('TransactionForm_shouldFilterCategoriesBySelectedType', async () => {
     // Arrange
-    const user = userEvent.setup();
     render(
       <TransactionForm
         mode="create"
@@ -75,7 +74,6 @@ describe('TransactionForm', () => {
     );
 
     // Act: Open the category dropdown
-    const select = screen.getByLabelText(/Catégorie/i);
     
     // Assert: Check options
     // Default type is DEPENSE, so we expect Alimentation (DEPENSE) and Loisirs (BOTH)

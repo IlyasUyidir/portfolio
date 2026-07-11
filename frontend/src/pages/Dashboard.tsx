@@ -10,17 +10,14 @@ import { SpendingPieChart } from '../components/charts/SpendingPieChart';
 import { RevenueExpensesBar } from '../components/charts/RevenueExpensesBar';
 import { currentMonth, formatDate, formatCurrency } from '../utils';
 import { useAuth } from '../hooks/useAuth';
-import * as dashboardApi from '../api/dashboardApi';
-import * as transactionApi from '../api/transactionApi';
-import * as budgetApi from '../api/budgetApi';
 import { useDashboard } from '../hooks/api/useDashboard';
-import type { DashboardKpis, SpendingCategory, Transaction, BudgetProgress } from '../types';
+import type { BudgetProgress } from '../types';
 
 export const Dashboard: React.FC = () => {
   const { isPremium } = useAuth();
   const [month, setMonth] = useState(currentMonth());
 
-  const { data, isLoading, error, refetch } = useDashboard(month);
+  const { data, isLoading, error } = useDashboard(month);
 
   const kpis = data?.kpis || null;
   const spending = data?.spending || [];

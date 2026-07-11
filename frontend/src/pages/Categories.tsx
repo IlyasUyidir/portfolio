@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { listCategories, createCategory, updateCategory, deleteCategory } from '../api/categoryApi';
+import { createCategory, updateCategory, deleteCategory } from '../api/categoryApi';
 import type { Category, CreateCategoryRequest } from '../types';
 import { CategoryList } from '../components/categories/CategoryList';
 import { CategoryForm } from '../components/categories/CategoryForm';

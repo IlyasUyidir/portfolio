@@ -1,8 +1,6 @@
-version: '3.9'
-
 services:
   # ──────────────────────────────────────────────
-  # PostgreSQL 15 — Development Database
+  # 1. PostgreSQL Database
   # ──────────────────────────────────────────────
   postgres:
     image: postgres:15-alpine
@@ -21,6 +19,37 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  # ──────────────────────────────────────────────
+  # 2. Spring Boot Backend
+  # ──────────────────────────────────────────────
+  backend:
+    build: ./backend
+    container_name: my-running-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Tells your Java app to connect to the Docker DB, not localhost
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/portfolio_db
+      - SPRING_DATASOURCE_USERNAME=portfolio_user
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - JWT_SECRET=${JWT_SECRET}
+
+  # ──────────────────────────────────────────────
+  # 3. React/Nginx Frontend
+  # ──────────────────────────────────────────────
+  frontend:
+    build: ./frontend
+    container_name: folio-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:

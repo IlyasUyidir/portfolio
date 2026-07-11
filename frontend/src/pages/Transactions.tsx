@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, {useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SearchX } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
@@ -41,7 +41,7 @@ export const Transactions: React.FC = () => {
   const { data: categoriesData } = useCategories();
   const categories = categoriesData ?? [];
 
-  const { mutate: performSave, isLoading: isSaving, error: saveError } = useMutation(
+  const { mutate: performSave, error: saveError } = useMutation(
     async (formData: any) => {
       if (formMode === 'create') {
         return await createTransaction(formData);

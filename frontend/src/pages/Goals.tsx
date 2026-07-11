@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { listGoals, getGoalProgress, createGoal, contribute, deleteGoal } from '../api/goalApi';
-import type { Goal, GoalProgress } from '../types';
+import { createGoal, contribute, deleteGoal } from '../api/goalApi';
+
 import { GoalCard } from '../components/goals/GoalCard';
 import { GoalForm } from '../components/goals/GoalForm';
 import { ContributeModal } from '../components/goals/ContributeModal';

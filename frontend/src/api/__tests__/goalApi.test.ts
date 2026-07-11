@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import apiClient from '../apiClient';
 import { listGoals, createGoal, contribute, getGoalProgress, deleteGoal } from '../goalApi';
-import type { GoalApiResponse, GoalProgressApiResponse } from '../goalApi'; // Assuming I can access these or I'll define them
+
 
 // Mock the apiClient
 vi.mock('../apiClient', () => ({

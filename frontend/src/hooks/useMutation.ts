@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-interface MutationOptions<T, R> {
+interface MutationOptions<R> {
   onSuccess?: (data: R) => void;
   onError?: (error: string) => void;
 }
@@ -11,7 +11,7 @@ interface MutationOptions<T, R> {
  */
 export function useMutation<T, R>(
   mutationFn: (variables: T) => Promise<R>,
-  options?: MutationOptions<T, R>
+  options?: MutationOptions<R>
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
