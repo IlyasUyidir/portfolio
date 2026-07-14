@@ -123,7 +123,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           build-args: |
-            VITE_API_BASE_URL=https://folio-ilyas.duckdns.org/api
+            VITE_API_BASE_URL=https://folio-ilyas.duckdns.org/api/v1
           tags: |
             ghcr.io/${{ steps.repo-name.outputs.lower }}/folio-frontend:${{ github.sha }}
             ghcr.io/${{ steps.repo-name.outputs.lower }}/folio-frontend:latest
