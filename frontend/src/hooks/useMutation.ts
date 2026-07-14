@@ -5,6 +5,20 @@ interface MutationOptions<R> {
   onError?: (error: string) => void;
 }
 
+/** Shape of an Axios-style error — enough to safely extract the backend message. */
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string;
+    };
+  };
+  message?: string;
+}
+
+function isApiError(e: unknown): e is ApiError {
+  return typeof e === 'object' && e !== null;
+}
+
 /**
  * Custom hook for data mutations (POST, PUT, DELETE).
  * Manages loading and error states for async actions.
@@ -27,7 +41,9 @@ export function useMutation<T, R>(
       return result;
     } catch (err: unknown) {
       console.error('Mutation error:', err);
-      const errorMessage = err.response?.data?.error ?? err.message ?? 'Une erreur est survenue';
+      const errorMessage = isApiError(err)
+        ? (err.response?.data?.error ?? err.message ?? 'Une erreur est survenue')
+        : 'Une erreur est survenue';
       setError(errorMessage);
       if (options?.onError) {
         options.onError(errorMessage);

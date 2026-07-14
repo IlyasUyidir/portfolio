@@ -2,6 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useGoals } from './useGoals';
 import * as goalApi from '../../api/goalApi';
+import type { Goal, GoalProgress } from '../../types';
 
 vi.mock('../../api/goalApi', () => ({
   listGoals: vi.fn(),
@@ -13,10 +14,46 @@ describe('useGoals', () => {
     vi.clearAllMocks();
   });
 
-  const mockGoal1 = { id: 1, name: 'Goal 1', targetAmount: 1000, currentAmount: 500 };
-  const mockGoal2 = { id: 2, name: 'Goal 2', targetAmount: 2000, currentAmount: 1000 };
-  const mockProgress1 = { goal: mockGoal1, currentAmount: 500, targetAmount: 1000, percentage: 50, milestones: [] };
-  const mockProgress2 = { goal: mockGoal2, currentAmount: 1000, targetAmount: 2000, percentage: 50, milestones: [] };
+  // Goal requires: id, title, targetAmount, currentAmount, targetDate, status, createdAt
+  const mockGoal1: Goal = {
+    id: 1,
+    title: 'Goal 1',
+    targetAmount: 100000,
+    currentAmount: 50000,
+    targetDate: '2027-01-01',
+    status: 'EN_COURS',
+    createdAt: '2026-01-01T00:00:00Z',
+  };
+  const mockGoal2: Goal = {
+    id: 2,
+    title: 'Goal 2',
+    targetAmount: 200000,
+    currentAmount: 100000,
+    targetDate: '2027-06-01',
+    status: 'EN_COURS',
+    createdAt: '2026-01-01T00:00:00Z',
+  };
+
+  // GoalProgress requires: goalId, title, targetAmount, currentAmount, progressPercentage,
+  // milestones: {twentyFive, fifty, seventyFive, hundred}, status
+  const mockProgress1: GoalProgress = {
+    goalId: 1,
+    title: 'Goal 1',
+    targetAmount: 100000,
+    currentAmount: 50000,
+    progressPercentage: 50,
+    milestones: { twentyFive: true, fifty: true, seventyFive: false, hundred: false },
+    status: 'EN_COURS',
+  };
+  const mockProgress2: GoalProgress = {
+    goalId: 2,
+    title: 'Goal 2',
+    targetAmount: 200000,
+    currentAmount: 100000,
+    progressPercentage: 50,
+    milestones: { twentyFive: true, fifty: true, seventyFive: false, hundred: false },
+    status: 'EN_COURS',
+  };
 
   it('should return loading initially and then fetch goals and their progress on success', async () => {
     vi.mocked(goalApi.listGoals).mockResolvedValue([mockGoal1, mockGoal2]);

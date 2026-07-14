@@ -2,6 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useTransactions } from './useTransactions';
 import * as transactionApi from '../../api/transactionApi';
+import type { TransactionPage } from '../../types';
 
 vi.mock('../../api/transactionApi', () => ({
   listTransactions: vi.fn(),
@@ -12,12 +13,23 @@ describe('useTransactions', () => {
     vi.clearAllMocks();
   });
 
-  const mockTransactions = {
-    content: [{ id: 1, title: 'Lunch', amount: 1500, type: 'DEPENSE', txDate: '2026-05-15', categoryId: 1 }],
-    pageable: { pageNumber: 0, pageSize: 10 },
+  // TransactionPage requires `number` (current page) and `size`; Transaction requires `category` and `createdAt`
+  const mockTransactions: TransactionPage = {
+    content: [
+      {
+        id: 1,
+        title: 'Lunch',
+        amount: 1500,
+        type: 'DEPENSE',
+        category: { id: 1, name: 'Food', color: '#f00', type: 'DEPENSE', isSystem: false },
+        txDate: '2026-05-15',
+        createdAt: '2026-05-15T12:00:00Z',
+      },
+    ],
     totalElements: 1,
     totalPages: 1,
-    last: true,
+    number: 0,
+    size: 10,
   };
 
   it('should return loading initially and then data on success', async () => {

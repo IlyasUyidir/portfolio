@@ -5,6 +5,19 @@ import { useAuth } from '../hooks/useAuth';
 import * as authApi from '../api/authApi';
 import type { LoginRequest } from '../types';
 
+/** Shape of an Axios-style error — enough to extract the backend's error message. */
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string;
+    };
+  };
+}
+
+function isApiError(e: unknown): e is ApiError {
+  return typeof e === 'object' && e !== null;
+}
+
 export const Login: React.FC = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginRequest>();
   const { login } = useAuth();
@@ -20,7 +33,10 @@ export const Login: React.FC = () => {
       login(user);
       navigate('/dashboard');
     } catch (error: unknown) {
-      setServerError(error.response?.data?.error || 'Identifiants incorrects');
+      const message = isApiError(error)
+        ? (error.response?.data?.error ?? 'Identifiants incorrects')
+        : 'Identifiants incorrects';
+      setServerError(message);
     } finally {
       setIsLoading(false);
     }
