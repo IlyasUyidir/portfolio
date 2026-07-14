@@ -15,6 +15,7 @@
 backend/target/
 frontend/dist/
 frontend/node_modules/
+frontend/coverage/
 
 # Documentation & Guides
 *.docx

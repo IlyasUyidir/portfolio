@@ -13,6 +13,7 @@ import com.gc2026.portfolio.repository.BudgetRepository;
 import com.gc2026.portfolio.repository.CategoryRepository;
 import com.gc2026.portfolio.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -385,5 +386,15 @@ class BudgetServiceTest {
         // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> budgetService.deleteBudget(userId2, budget.getId()));
         verify(budgetRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("Explicit IDOR: User B cannot update User A's budget category")
+    void explicitIdorTest_userBCannotUpdateUserABudget() {
+        Long userB = 2L;
+        // userB does not own the category
+        when(categoryRepository.findByIdAndUserIdOrSystem(validRequest.getCategoryId(), userB)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> budgetService.createOrUpdate(userB, validRequest));
     }
 }

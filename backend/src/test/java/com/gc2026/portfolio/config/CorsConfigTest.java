@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -19,18 +19,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = AuthController.class)
 @Import(CorsConfig.class)
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
+@org.springframework.test.annotation.DirtiesContext
+@org.springframework.test.context.TestPropertySource(properties = "app.cors.allowed-origins=http://localhost:5173")
 class CorsConfigTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private AuthService authService;
 
-    @MockBean
+    @MockitoBean
     private JwtFilter jwtFilter;
 
-    @MockBean
+    @MockitoBean
     private RateLimitFilter rateLimitFilter;
 
     @Test
@@ -48,8 +50,21 @@ class CorsConfigTest {
     void corsConfig_shouldAllowFrontendOrigin() throws Exception {
         mockMvc.perform(options("/api/v1/auth/login")
                         .header("Origin", "http://localhost:5173")
-                        .header("Access-Control-Request-Method", "POST"))
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "Content-Type, Authorization, X-Requested-With"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"));
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"))
+                .andExpect(header().string("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With"));
+    }
+
+    @Test
+    @DisplayName("13. corsConfig_shouldRejectDisallowedHeader")
+    void corsConfig_shouldRejectDisallowedHeader() throws Exception {
+        mockMvc.perform(options("/api/v1/auth/login")
+                        .header("Origin", "http://localhost:5173")
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "X-Not-Allowed"))
+                .andExpect(status().isForbidden())
+                .andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
     }
 }

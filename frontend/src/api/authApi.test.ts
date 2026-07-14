@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import apiClient from '../apiClient';
-import { register, login, logout, getMe } from '../authApi';
-import type { UserProfile, RegisterRequest, LoginRequest } from '../../types';
+import apiClient from './apiClient';
+import { register, login, logout, getMe } from './authApi';
+import type { UserProfile, RegisterRequest, LoginRequest } from '../types';
 
 // Mock the apiClient module
-vi.mock('../apiClient', () => ({
+vi.mock('./apiClient', () => ({
   default: {
     post: vi.fn(),
     get: vi.fn(),

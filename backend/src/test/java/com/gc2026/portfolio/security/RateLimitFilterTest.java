@@ -29,6 +29,9 @@ class RateLimitFilterTest {
 
         @GetMapping("/api/v1/auth/register")
         void register() {}
+
+        @GetMapping("/api/v1/export/csv")
+        void exportCsv() {}
     }
 
     @BeforeEach
@@ -90,7 +93,7 @@ class RateLimitFilterTest {
     }
 
     @Test
-    void rateLimit_whenPathIsNotAuth_shouldNotBeRateLimited() throws Exception {
+    void rateLimit_whenPathIsNotAuthOrExport_shouldNotBeRateLimited() throws Exception {
         // Act & Assert
         for (int i = 0; i < 15; i++) {
             mockMvc.perform(post("/api/v1/other")
@@ -134,6 +137,54 @@ class RateLimitFilterTest {
                         .with(request -> { request.setRemoteAddr("2.2.2.2"); return request; })
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void rateLimit_whenXForwardedForIsSet_shouldUseFirstIp() throws Exception {
+        // Arrange: Exhaust bucket for the real client IP (10.0.0.1) that is behind proxy (192.168.1.1)
+        for (int i = 0; i < 10; i++) {
+            mockMvc.perform(post("/api/v1/auth/login")
+                    .header("X-Forwarded-For", "10.0.0.1, 192.168.1.1")
+                    .with(request -> { request.setRemoteAddr("127.0.0.1"); return request; })
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{}"));
+        }
+
+        // 10.0.0.1 is now rate limited
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .header("X-Forwarded-For", "10.0.0.1")
+                        .with(request -> { request.setRemoteAddr("127.0.0.1"); return request; })
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isTooManyRequests());
+
+        // Act & Assert: IP 10.0.0.2 should still be allowed, even with same proxy IP
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .header("X-Forwarded-For", "10.0.0.2, 192.168.1.1")
+                        .with(request -> { request.setRemoteAddr("127.0.0.1"); return request; })
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void rateLimit_exportEndpoint_shouldHaveStricterLimit() throws Exception {
+        // Arrange: Exhaust bucket for export (limit is 5)
+        for (int i = 0; i < 5; i++) {
+            mockMvc.perform(get("/api/v1/export/csv")
+                    .with(request -> { request.setRemoteAddr("1.1.1.1"); return request; }));
+        }
+
+        // 6th request should fail
+        mockMvc.perform(get("/api/v1/export/csv")
+                        .with(request -> { request.setRemoteAddr("1.1.1.1"); return request; }))
+                .andExpect(status().isTooManyRequests());
+        
+        // But auth endpoint should still have its own separate bucket capacity or at least be allowed since it's a different bucket!
+        // (Wait, they have different buckets per endpoint type)
+        mockMvc.perform(get("/api/v1/auth/register")
+                        .with(request -> { request.setRemoteAddr("1.1.1.1"); return request; }))
                 .andExpect(status().isOk());
     }
 }

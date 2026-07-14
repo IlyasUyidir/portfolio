@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import apiClient from '../apiClient';
-import { listGoals, createGoal, contribute, getGoalProgress, deleteGoal } from '../goalApi';
+import apiClient from './apiClient';
+import { listGoals, createGoal, contribute, getGoalProgress, deleteGoal } from './goalApi';
 
 
 // Mock the apiClient
-vi.mock('../apiClient', () => ({
+vi.mock('./apiClient', () => ({
   default: {
     get: vi.fn(),
     post: vi.fn(),

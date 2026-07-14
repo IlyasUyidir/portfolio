@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatDate, currentMonth } from '../formatDate';
+import { formatDate, currentMonth } from './formatDate';
 
 describe('formatDate Utility', () => {
   describe('formatDate', () => {

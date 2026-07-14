@@ -15,9 +15,14 @@ import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+
 @RestController
 @RequestMapping("/api/v1/budgets")
 @RequiredArgsConstructor
+@Validated
 public class BudgetController {
 
     private final BudgetService budgetService;
@@ -33,7 +38,7 @@ public class BudgetController {
     @GetMapping("/{month}")
     public ResponseEntity<List<BudgetProgressResponse>> getBudgetsByMonth(
             HttpServletRequest httpRequest,
-            @PathVariable String month) {
+            @PathVariable @Pattern(regexp = "^\\d{4}-(0[1-9]|1[0-2])$", message = "Month must be in YYYY-MM format") String month) {
         Long userId = (Long) httpRequest.getAttribute("userId");
         try {
             YearMonth yearMonth = YearMonth.parse(month);
@@ -46,7 +51,7 @@ public class BudgetController {
     @GetMapping("/{id}/progress")
     public ResponseEntity<BudgetProgressResponse> getBudgetProgress(
             HttpServletRequest httpRequest,
-            @PathVariable Long id) {
+            @PathVariable @Positive(message = "ID must be positive") Long id) {
         Long userId = (Long) httpRequest.getAttribute("userId");
         return ResponseEntity.ok(budgetService.getProgress(userId, id));
     }
@@ -54,7 +59,7 @@ public class BudgetController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBudget(
             HttpServletRequest httpRequest,
-            @PathVariable Long id) {
+            @PathVariable @Positive(message = "ID must be positive") Long id) {
         Long userId = (Long) httpRequest.getAttribute("userId");
         budgetService.deleteBudget(userId, id);
         return ResponseEntity.noContent().build();

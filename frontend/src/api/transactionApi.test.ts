@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import apiClient from '../apiClient';
+import apiClient from './apiClient';
 import { 
   listTransactions, 
   getTransaction, 
   createTransaction, 
   updateTransaction, 
   deleteTransaction 
-} from '../transactionApi';
+} from './transactionApi';
 
-vi.mock('../apiClient', () => ({
+vi.mock('./apiClient', () => ({
   default: {
     get: vi.fn(),
     post: vi.fn(),

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.web.servlet.MockMvc;
@@ -38,13 +38,13 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private AuthService authService;
 
-    @MockBean
+    @MockitoBean
     private JwtFilter jwtFilter; // exclude from filter chain
 
-    @MockBean
+    @MockitoBean
     private RateLimitFilter rateLimitFilter;
 
     private UserResponse userResponse;
@@ -334,6 +334,25 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.error").exists());
     }
 
+    @Test
+    @DisplayName("9b. login_shouldSetSameSiteLaxCookie")
+    void login_shouldSetSameSiteLaxCookie() throws Exception {
+        // Arrange
+        LoginRequest request = LoginRequest.builder()
+                .email("test@folio.io")
+                .password("password123")
+                .build();
+
+        when(authService.login(any(LoginRequest.class))).thenReturn(authResponse);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Set-Cookie", containsString("SameSite=Lax")));
+    }
+
     // --- POST /api/v1/auth/logout ---
 
     @Test
@@ -344,7 +363,7 @@ class AuthControllerTest {
                         .cookie(new Cookie("auth_token", "some.token")))
                 .andExpect(status().isOk())
                 .andExpect(cookie().maxAge("auth_token", 0))
-                .andExpect(cookie().value("auth_token", (String) null));
+                .andExpect(cookie().value("auth_token", ""));
     }
 
     @Test

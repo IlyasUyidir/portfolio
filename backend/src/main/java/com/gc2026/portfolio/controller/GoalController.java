@@ -14,9 +14,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.constraints.Positive;
+
 @RestController
 @RequestMapping("/api/v1/goals")
 @RequiredArgsConstructor
+@Validated
 public class GoalController {
 
     private final GoalService goalService;
@@ -39,7 +43,7 @@ public class GoalController {
     @PostMapping("/{id}/contribute")
     public ResponseEntity<GoalResponse> addContribution(
             HttpServletRequest httpRequest,
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "ID must be positive") Long id,
             @Valid @RequestBody ContributeRequest request) {
         Long userId = (Long) httpRequest.getAttribute("userId");
         return ResponseEntity.ok(goalService.addContribution(userId, id, request));
@@ -48,7 +52,7 @@ public class GoalController {
     @GetMapping("/{id}/progress")
     public ResponseEntity<GoalProgressResponse> getGoalProgress(
             HttpServletRequest httpRequest,
-            @PathVariable Long id) {
+            @PathVariable @Positive(message = "ID must be positive") Long id) {
         Long userId = (Long) httpRequest.getAttribute("userId");
         return ResponseEntity.ok(goalService.getProgress(userId, id));
     }
@@ -56,7 +60,7 @@ public class GoalController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGoal(
             HttpServletRequest httpRequest,
-            @PathVariable Long id) {
+            @PathVariable @Positive(message = "ID must be positive") Long id) {
         Long userId = (Long) httpRequest.getAttribute("userId");
         goalService.deleteGoal(userId, id);
         return ResponseEntity.noContent().build();

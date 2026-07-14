@@ -323,4 +323,14 @@ class CategoryServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> categoryService.delete(userId2, customCat.getId()));
         verify(categoryRepository, never()).delete(any());
     }
+
+    @Test
+    @DisplayName("Explicit IDOR: User B cannot delete User A's category")
+    void explicitIdorTest_userBCannotDeleteUserACategory() {
+        Long userB = 2L;
+        // The service scopes the query to userB's ID, so it won't find userA's category
+        when(categoryRepository.findByIdAndUserId(customCat.getId(), userB)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.delete(userB, customCat.getId()));
+    }
 }

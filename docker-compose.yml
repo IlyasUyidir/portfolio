@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_DB: portfolio_db
       POSTGRES_USER: portfolio_user
-      POSTGRES_PASSWORD: secret
+      POSTGRES_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -36,7 +36,7 @@ services:
       # Tells your Java app to connect to the Docker DB, not localhost
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/portfolio_db
       - SPRING_DATASOURCE_USERNAME=portfolio_user
-      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
 
   # ──────────────────────────────────────────────

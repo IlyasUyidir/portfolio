@@ -444,5 +444,15 @@ class GoalServiceTest {
             // Act & Assert
             assertThrows(ResourceNotFoundException.class, () -> goalService.getProgress(userId2, activeGoal.getId()));
         }
+
+        @Test
+        @DisplayName("Explicit IDOR: User B cannot delete User A's goal")
+        void explicitIdorTest_userBCannotDeleteUserAGoal() {
+            Long userB = 2L;
+            // The service scopes the query to userB's ID, so it won't find userA's goal
+            when(goalRepository.findByIdAndUserId(activeGoal.getId(), userB)).thenReturn(Optional.empty());
+
+            assertThrows(ResourceNotFoundException.class, () -> goalService.deleteGoal(userB, activeGoal.getId()));
+        }
     }
 }

@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.constraints.Positive;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
+@Validated
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -41,7 +44,7 @@ public class CategoryController {
 
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponse> update(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "ID must be positive") Long id,
             @Valid @RequestBody UpdateCategoryRequest request,
             HttpServletRequest httpRequest) {
 
@@ -52,7 +55,7 @@ public class CategoryController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> delete(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "ID must be positive") Long id,
             HttpServletRequest httpRequest) {
 
         Long userId = (Long) httpRequest.getAttribute("userId");

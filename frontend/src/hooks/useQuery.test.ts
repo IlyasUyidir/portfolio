@@ -1,6 +1,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
-import { useQuery } from '../useQuery';
+import { useQuery } from './useQuery';
 
 describe('useQuery', () => {
   // 1. Initial loading state

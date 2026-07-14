@@ -51,6 +51,11 @@ public class GlobalExceptionHandlerTest {
         @PostMapping("/bean-validation")
         void beanValidation(@RequestBody @Valid SomeDto dto) {
         }
+
+        @GetMapping("/number-format")
+        void numberFormat() {
+            throw new NumberFormatException("For input string: \"abc\"");
+        }
     }
 
     @lombok.Data
@@ -98,5 +103,12 @@ public class GlobalExceptionHandlerTest {
                         .content(invalidBody))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value(containsString("Name is required")));
+    }
+
+    @Test
+    void handleNumberFormatException_shouldReturn400WithErrorJson() throws Exception {
+        mockMvc.perform(get("/test/number-format"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value(containsString("Invalid numeric format: For input string: \"abc\"")));
     }
 }

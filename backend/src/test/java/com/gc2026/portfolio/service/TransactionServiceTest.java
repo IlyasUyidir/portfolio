@@ -12,6 +12,7 @@ import com.gc2026.portfolio.dto.response.TransactionResponse;
 import com.gc2026.portfolio.repository.CategoryRepository;
 import com.gc2026.portfolio.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -485,5 +486,15 @@ class TransactionServiceTest {
         // Act & Assert
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> transactionService.create(userId1, request));
         verify(transactionRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("Explicit IDOR: User B cannot delete User A's transaction")
+    void explicitIdorTest_userBCannotDeleteUserATransaction() {
+        Long userB = 2L;
+        // The service scopes the query to userB's ID, so it won't find userA's transaction
+        when(transactionRepository.findByIdAndUserIdAndIsDeletedFalse(tx.getId(), userB)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> transactionService.delete(userB, tx.getId()));
     }
 }

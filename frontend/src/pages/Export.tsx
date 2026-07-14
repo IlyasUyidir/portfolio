@@ -3,6 +3,7 @@ import { Download, FileText, Table, Lock } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { downloadCsv, downloadExcel } from '../api/exportApi';
 import { TopBar } from '../components/layout/TopBar';
+import { AlertBanner } from '../components/ui/AlertBanner';
 
 export const Export: React.FC = () => {
   const { isPremium } = useAuth();
@@ -66,9 +67,7 @@ export const Export: React.FC = () => {
           </div>
 
           {error && (
-            <div className="bg-danger/10 border border-danger text-danger p-4 rounded-xl mb-6">
-              {error}
-            </div>
+            <AlertBanner severity="critical" message={error} onDismiss={() => setError(null)} />
           )}
 
           <div className="grid md:grid-cols-2 gap-6">

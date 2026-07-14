@@ -45,7 +45,6 @@ Folio.io is a personal finance tracker that lets users manage transactions, set 
 | Spending pie chart            | ✅             | ✅           |
 | Revenue/expenses history      | ❌             | ✅           |
 | CSV export                    | ✅             | ✅           |
-| Excel export                  | ❌             | ✅           |
 
 ### Core Modules
 
@@ -375,7 +374,7 @@ All endpoints are prefixed with `/api/v1`. Authentication uses an `auth_token` H
 | Role       | Description                                                                                        |
 | ---------- | -------------------------------------------------------------------------------------------------- |
 | `STANDARD` | Default on registration. Limited to 500 transactions, 10 custom categories, 1 active goal.         |
-| `PREMIUM`  | Unlocks unlimited transactions, categories, and goals. Enables historical charts and Excel export. |
+| `PREMIUM`  | Unlocks unlimited transactions, categories, and goals. Enables historical charts and CSV export. |
 | `ADMIN`    | Same privileges as PREMIUM.                                                                        |
 
 Role is embedded in the JWT and read from the `userRole` request attribute by controllers and services.

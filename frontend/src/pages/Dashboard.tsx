@@ -75,7 +75,7 @@ export const Dashboard: React.FC = () => {
         {isLoading ? (
           <div className="text-text-secondary py-10 text-center">Chargement...</div>
         ) : error ? (
-          <div className="text-danger bg-danger/10 p-4 rounded-lg">{error}</div>
+          <AlertBanner severity="critical" message={error} onDismiss={() => {}} />
         ) : (
           <>
             {/* KPI Cards */}

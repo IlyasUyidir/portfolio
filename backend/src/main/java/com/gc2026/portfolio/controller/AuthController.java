@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,12 +46,14 @@ public class AuthController {
         }
         
         // Clear cookie
-        Cookie cookie = new Cookie("auth_token", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("auth_token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         
         return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
@@ -62,13 +66,14 @@ public class AuthController {
     }
 
     private void setTokenCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("auth_token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // Should be true in production (HTTPS)
-        cookie.setPath("/");
-        cookie.setMaxAge(86400); // 1 day
-        // cookie.setAttribute("SameSite", "Strict"); // Spring Boot 3+ Cookie supports this better via headers or specialized classes
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("auth_token", token)
+                .httpOnly(true)
+                .secure(true) // Should be true in production (HTTPS)
+                .path("/")
+                .maxAge(86400) // 1 day
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     private String extractTokenFromCookie(HttpServletRequest request) {

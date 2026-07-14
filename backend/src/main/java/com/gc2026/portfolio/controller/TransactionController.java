@@ -20,9 +20,13 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.Map;
 
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.constraints.Positive;
+
 @RestController
 @RequestMapping("/api/v1/transactions")
 @RequiredArgsConstructor
+@Validated
 public class TransactionController {
 
     private static final int DEFAULT_PAGE_SIZE = 20;
@@ -45,7 +49,7 @@ public class TransactionController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) TransactionType type,
-            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) @Positive(message = "Category ID must be positive") Long categoryId,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -65,7 +69,7 @@ public class TransactionController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TransactionResponse> getById(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "ID must be positive") Long id,
             HttpServletRequest httpRequest) {
 
         Long userId = (Long) httpRequest.getAttribute("userId");
@@ -75,7 +79,7 @@ public class TransactionController {
 
     @PutMapping("/{id}")
     public ResponseEntity<TransactionResponse> update(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "ID must be positive") Long id,
             @Valid @RequestBody UpdateTransactionRequest request,
             HttpServletRequest httpRequest) {
 
@@ -86,7 +90,7 @@ public class TransactionController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> delete(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "ID must be positive") Long id,
             HttpServletRequest httpRequest) {
 
         Long userId = (Long) httpRequest.getAttribute("userId");

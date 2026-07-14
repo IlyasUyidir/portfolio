@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TransactionForm } from '../../../components/transactions/TransactionForm';
-import type { Category, Transaction } from '../../../types';
+import { TransactionForm } from './TransactionForm';
+import type { Category, Transaction } from '../../types';
 
 // Mock data
 const mockCategories: Category[] = [

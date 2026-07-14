@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
-import { useMutation } from '../useMutation';
+import { useMutation } from './useMutation';
 
 describe('useMutation', () => {
   // 1. Initial state

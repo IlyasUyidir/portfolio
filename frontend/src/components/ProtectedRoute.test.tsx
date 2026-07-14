@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import { ProtectedRoute } from '../../components/ProtectedRoute';
-import { useAuth } from '../../hooks/useAuth';
+import { ProtectedRoute } from './ProtectedRoute';
+import { useAuth } from '../hooks/useAuth';
 
 // Mock the useAuth hook
-vi.mock('../../hooks/useAuth');
+vi.mock('../hooks/useAuth');
 const mockUseAuth = vi.mocked(useAuth);
 
 // Mock AppShell to simplify tests
-vi.mock('../../components/layout/AppShell', () => ({
+vi.mock('./layout/AppShell', () => ({
   AppShell: () => <div data-testid="app-shell">App Shell Content</div>
 }));
 
