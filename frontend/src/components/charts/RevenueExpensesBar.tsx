@@ -10,28 +10,28 @@ interface RevenueExpensesBarProps {
   }[];
 }
 
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { name: string; value: number; color: string }[]; label?: string }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-bg-card border border-border-subtle p-3 rounded-lg shadow-xl">
+        <p className="text-text-primary font-medium mb-2">{label}</p>
+        {payload.map((entry, index) => (
+          <p key={index} style={{ color: entry.color }} className="font-bold text-sm">
+            {entry.name} : {formatCurrency(entry.value * 100)}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 export const RevenueExpensesBar: React.FC<RevenueExpensesBarProps> = ({ data }) => {
   const chartData = data.map(item => ({
     name: item.month,
     Revenus: item.revenue / 100,
     Dépenses: item.expenses / 100,
   }));
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-bg-card border border-border-subtle p-3 rounded-lg shadow-xl">
-          <p className="text-text-primary font-medium mb-2">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }} className="font-bold text-sm">
-              {entry.name} : {formatCurrency(entry.value * 100)}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <ResponsiveContainer width="100%" height={300}>

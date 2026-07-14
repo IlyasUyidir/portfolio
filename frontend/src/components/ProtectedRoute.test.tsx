@@ -27,7 +27,7 @@ describe('ProtectedRoute', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn()
-    } as any);
+    } as unknown as ReturnType<typeof useAuth>);
 
     render(
       <MemoryRouter>
@@ -48,7 +48,7 @@ describe('ProtectedRoute', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn()
-    } as any);
+    } as unknown as ReturnType<typeof useAuth>);
 
     render(
       <MemoryRouter initialEntries={['/dashboard']}>
@@ -75,7 +75,7 @@ describe('ProtectedRoute', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn()
-    } as any);
+    } as unknown as ReturnType<typeof useAuth>);
 
     render(
       <MemoryRouter initialEntries={['/dashboard']}>

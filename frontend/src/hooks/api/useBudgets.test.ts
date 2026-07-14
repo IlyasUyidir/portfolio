@@ -22,7 +22,7 @@ describe('useBudgets', () => {
   };
 
   it('should return loading initially and then data on success', async () => {
-    (budgetApi.listBudgetsByMonth as any).mockResolvedValue([mockBudgetProgress]);
+    vi.mocked(budgetApi.listBudgetsByMonth).mockResolvedValue([mockBudgetProgress]);
 
     const { result } = renderHook(() => useBudgets('2026-05'));
 
@@ -37,7 +37,7 @@ describe('useBudgets', () => {
   });
 
   it('should return error if API call fails', async () => {
-    (budgetApi.listBudgetsByMonth as any).mockRejectedValue(new Error('Network error'));
+    vi.mocked(budgetApi.listBudgetsByMonth).mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useBudgets('2026-05'));
 

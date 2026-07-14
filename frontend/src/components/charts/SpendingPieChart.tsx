@@ -7,26 +7,26 @@ interface SpendingPieChartProps {
   data: SpendingCategory[];
 }
 
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { name: string; value: number }[] }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-bg-card border border-border-subtle p-3 rounded-lg shadow-xl">
+        <p className="text-text-primary font-medium">{payload[0].name}</p>
+        <p className="text-danger font-bold">
+          {formatCurrency(payload[0].value * 100)}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 export const SpendingPieChart: React.FC<SpendingPieChartProps> = ({ data }) => {
   const chartData = data.map(item => ({
     name: item.category.name,
     value: item.totalAmount / 100, // Recharts works better with actual numbers
     color: item.category.color,
   }));
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-bg-card border border-border-subtle p-3 rounded-lg shadow-xl">
-          <p className="text-text-primary font-medium">{payload[0].name}</p>
-          <p className="text-danger font-bold">
-            {formatCurrency(payload[0].value * 100)}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   if (!data || data.length === 0) {
     return (

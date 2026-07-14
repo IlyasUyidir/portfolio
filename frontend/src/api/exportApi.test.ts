@@ -17,7 +17,7 @@ describe('exportApi', () => {
 
   describe('downloadCsv', () => {
     it('should get from correct endpoint with blob responseType', async () => {
-      (apiClient.get as any).mockResolvedValue({ data: mockBlob });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: mockBlob });
 
       const result = await downloadCsv();
 
@@ -26,7 +26,7 @@ describe('exportApi', () => {
     });
 
     it('should throw error on failure', async () => {
-      (apiClient.get as any).mockRejectedValue(new Error('Network Error'));
+      vi.mocked(apiClient.get).mockRejectedValue(new Error('Network Error'));
 
       await expect(downloadCsv()).rejects.toThrow('Network Error');
     });
@@ -35,7 +35,7 @@ describe('exportApi', () => {
   describe('downloadExcel', () => {
     it('should get from correct endpoint with blob responseType', async () => {
       const mockExcelBlob = new Blob(['test'], { type: 'application/vnd.ms-excel' });
-      (apiClient.get as any).mockResolvedValue({ data: mockExcelBlob });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: mockExcelBlob });
 
       const result = await downloadExcel();
 

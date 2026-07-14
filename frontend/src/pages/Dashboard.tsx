@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Wallet, TrendingUp, TrendingDown, PiggyBank, ArrowRight, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { TopBar } from '../components/layout/TopBar';
@@ -22,14 +22,13 @@ export const Dashboard: React.FC = () => {
   const kpis = data?.kpis || null;
   const spending = data?.spending || [];
   const recentTransactions = data?.recentTransactions || [];
+  const [prevData, setPrevData] = useState(data);
   const [budgetAlerts, setBudgetAlerts] = useState<BudgetProgress[]>([]);
 
-  useEffect(() => {
-    if (data?.budgetAlerts) {
-      setBudgetAlerts(data.budgetAlerts);
-    }
-  }, [data]);
-
+  if (data !== prevData) {
+    setPrevData(data);
+    setBudgetAlerts(data?.budgetAlerts || []);
+  }
 
   // Mock historical data for the bar chart
   const mockedHistoricalData = [

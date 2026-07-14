@@ -32,7 +32,7 @@ describe('authApi', () => {
         username: 'testuser',
         password: 'password123',
       };
-      (apiClient.post as any).mockResolvedValue({ data: mockUser });
+      vi.mocked(apiClient.post).mockResolvedValue({ data: mockUser });
 
       // Act
       await register(registerData);
@@ -48,7 +48,7 @@ describe('authApi', () => {
         username: 'testuser',
         password: 'password123',
       };
-      (apiClient.post as any).mockResolvedValue({ data: mockUser });
+      vi.mocked(apiClient.post).mockResolvedValue({ data: mockUser });
 
       // Act
       const result = await register(registerData);
@@ -66,7 +66,7 @@ describe('authApi', () => {
         email: 'test@folio.io',
         password: 'password123',
       };
-      (apiClient.post as any).mockResolvedValue({ data: mockUser });
+      vi.mocked(apiClient.post).mockResolvedValue({ data: mockUser });
 
       // Act
       await login(loginData);
@@ -81,7 +81,7 @@ describe('authApi', () => {
         email: 'test@folio.io',
         password: 'password123',
       };
-      (apiClient.post as any).mockResolvedValue({ data: mockUser });
+      vi.mocked(apiClient.post).mockResolvedValue({ data: mockUser });
 
       // Act
       const result = await login(loginData);
@@ -95,7 +95,7 @@ describe('authApi', () => {
   describe('logout', () => {
     it('logout_shouldPostToLogoutEndpoint', async () => {
       // Arrange
-      (apiClient.post as any).mockResolvedValue({});
+      vi.mocked(apiClient.post).mockResolvedValue({});
 
       // Act
       await logout();
@@ -107,7 +107,7 @@ describe('authApi', () => {
     it('logout_whenApiThrows_shouldNotPropagateError', async () => {
       // Arrange
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      (apiClient.post as any).mockRejectedValue(new Error('Network error'));
+      vi.mocked(apiClient.post).mockRejectedValue(new Error('Network error'));
 
       // Act & Assert
       await expect(logout()).resolves.toBeUndefined();
@@ -120,7 +120,7 @@ describe('authApi', () => {
   describe('getMe', () => {
     it('getMe_shouldGetFromCorrectEndpoint', async () => {
       // Arrange
-      (apiClient.get as any).mockResolvedValue({ data: mockUser });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: mockUser });
 
       // Act
       const result = await getMe();

@@ -39,10 +39,10 @@ describe('useDashboard', () => {
   ];
 
   it('should return loading initially and then combined data on success', async () => {
-    (dashboardApi.getKpis as any).mockResolvedValue(mockKpis);
-    (dashboardApi.getSpending as any).mockResolvedValue(mockSpending);
-    (transactionApi.listTransactions as any).mockResolvedValue(mockTransactions);
-    (budgetApi.listBudgetsByMonth as any).mockResolvedValue(mockBudgets);
+    vi.mocked(dashboardApi.getKpis).mockResolvedValue(mockKpis);
+    vi.mocked(dashboardApi.getSpending).mockResolvedValue(mockSpending);
+    vi.mocked(transactionApi.listTransactions).mockResolvedValue(mockTransactions);
+    vi.mocked(budgetApi.listBudgetsByMonth).mockResolvedValue(mockBudgets);
 
     const { result } = renderHook(() => useDashboard('2026-05'));
 
@@ -62,10 +62,10 @@ describe('useDashboard', () => {
   });
 
   it('should return error if any API call fails', async () => {
-    (dashboardApi.getKpis as any).mockRejectedValue(new Error('Kpi error'));
-    (dashboardApi.getSpending as any).mockResolvedValue(mockSpending);
-    (transactionApi.listTransactions as any).mockResolvedValue(mockTransactions);
-    (budgetApi.listBudgetsByMonth as any).mockResolvedValue(mockBudgets);
+    vi.mocked(dashboardApi.getKpis).mockRejectedValue(new Error('Kpi error'));
+    vi.mocked(dashboardApi.getSpending).mockResolvedValue(mockSpending);
+    vi.mocked(transactionApi.listTransactions).mockResolvedValue(mockTransactions);
+    vi.mocked(budgetApi.listBudgetsByMonth).mockResolvedValue(mockBudgets);
 
     const { result } = renderHook(() => useDashboard('2026-05'));
 

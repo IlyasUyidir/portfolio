@@ -28,7 +28,7 @@ describe('dashboardApi', () => {
 
   describe('getKpis', () => {
     it('should get from correct endpoint with params', async () => {
-      (apiClient.get as any).mockResolvedValue({ data: mockKpis });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: mockKpis });
 
       const result = await getKpis('2026-05');
 
@@ -37,7 +37,7 @@ describe('dashboardApi', () => {
     });
 
     it('should throw error on failure', async () => {
-      (apiClient.get as any).mockRejectedValue(new Error('Network Error'));
+      vi.mocked(apiClient.get).mockRejectedValue(new Error('Network Error'));
 
       await expect(getKpis('2026-05')).rejects.toThrow('Network Error');
     });
@@ -45,7 +45,7 @@ describe('dashboardApi', () => {
 
   describe('getSpending', () => {
     it('should get from correct endpoint', async () => {
-      (apiClient.get as any).mockResolvedValue({ data: [mockSpending] });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: [mockSpending] });
 
       const result = await getSpending();
 

@@ -6,15 +6,13 @@ import type { RegisterRequest } from '../types';
 import { useAuth } from '../hooks/useAuth';
 
 export const Register: React.FC = () => {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterRequest & { confirmPassword?: string }>();
+  const { register, handleSubmit, getValues, formState: { errors } } = useForm<RegisterRequest & { confirmPassword?: string }>();
   const navigate = useNavigate();
   const { login } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const password = watch('password');
-
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: RegisterRequest & { confirmPassword?: string }) => {
     setIsLoading(true);
     setServerError(null);
     try {
@@ -26,8 +24,9 @@ export const Register: React.FC = () => {
       const user = await authApi.register(payload);
       login(user);
       navigate('/dashboard');
-    } catch (error: any) {
-      setServerError(error.response?.data?.error || 'Erreur lors de la création du compte');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      setServerError(err.response?.data?.error || 'Erreur lors de la création du compte');
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +88,7 @@ export const Register: React.FC = () => {
               type="password"
               {...register('confirmPassword', { 
                 required: 'Confirmation requise',
-                validate: value => value === password || 'Les mots de passe ne correspondent pas'
+                validate: value => value === getValues('password') || 'Les mots de passe ne correspondent pas'
               })}
               className="w-full bg-bg-input border border-border-subtle rounded-lg px-4 py-2 text-text-primary focus:outline-none focus:border-primary transition-colors"
               placeholder="••••••••"

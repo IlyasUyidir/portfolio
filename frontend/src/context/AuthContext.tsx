@@ -12,6 +12,7 @@ interface AuthContextValue {
   isLoading: boolean;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -25,7 +26,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const userProfile = await authApi.getMe();
         setUser(userProfile);
         setIsAuthenticated(true);
-      } catch (error) {
+      } catch {
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);

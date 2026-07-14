@@ -25,14 +25,15 @@ export function useQuery<T>(
     try {
       const result = await fetcher();
       setData(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Query error:', err);
-      const errorMessage = err.response?.data?.error ?? err.message ?? 'Une erreur est survenue';
+      const e = err as { response?: { data?: { error?: string } }, message?: string };
+      const errorMessage = e.response?.data?.error ?? e.message ?? 'Une erreur est survenue';
       setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
   }, deps);
 
   useEffect(() => {

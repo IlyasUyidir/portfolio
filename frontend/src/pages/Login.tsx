@@ -19,7 +19,7 @@ export const Login: React.FC = () => {
       const user = await authApi.login(data);
       login(user);
       navigate('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       setServerError(error.response?.data?.error || 'Identifiants incorrects');
     } finally {
       setIsLoading(false);

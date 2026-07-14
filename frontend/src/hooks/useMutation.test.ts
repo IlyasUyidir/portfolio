@@ -14,7 +14,7 @@ describe('useMutation', () => {
   // 2. Loading state during mutation
   it('useMutation_whenMutating_shouldSetLoadingTrue', async () => {
     // mutationFn returns a promise that doesn't resolve immediately
-    let resolveMutation: (value: any) => void;
+    let resolveMutation: (value: unknown) => void;
     const mutationFn = vi.fn().mockImplementation(() => new Promise((resolve) => {
       resolveMutation = resolve;
     }));
@@ -22,7 +22,7 @@ describe('useMutation', () => {
     const { result } = renderHook(() => useMutation(mutationFn));
 
     // Act
-    let mutatePromise: Promise<any>;
+    let mutatePromise: Promise<unknown>;
     act(() => {
       mutatePromise = result.current.mutate({ data: 'test' });
     });
@@ -67,7 +67,7 @@ describe('useMutation', () => {
     await act(async () => {
       try {
         await result.current.mutate({});
-      } catch (err) {
+      } catch {
         // Expected rejection
       }
     });
@@ -87,7 +87,7 @@ describe('useMutation', () => {
     await act(async () => {
       try {
         await result.current.mutate({});
-      } catch (err) {
+      } catch {
         // Expected rejection
       }
     });
@@ -106,7 +106,9 @@ describe('useMutation', () => {
     await act(async () => {
       try {
         await result.current.mutate({});
-      } catch (err) {}
+      } catch {
+        // Expected rejection
+      }
     });
     expect(result.current.error).toBe('Fail');
 

@@ -27,7 +27,7 @@ describe('transactionApi', () => {
       // Arrange
       const mockParams = { page: 0, size: 10, type: 'DEPENSE' as const, categoryId: 5 };
       const mockResponse = { data: { content: [], totalElements: 0, totalPages: 0, number: 0, size: 10 } };
-      (apiClient.get as any).mockResolvedValue(mockResponse);
+      vi.mocked(apiClient.get).mockResolvedValue(mockResponse);
 
       // Act
       await listTransactions(mockParams);
@@ -40,7 +40,7 @@ describe('transactionApi', () => {
       // Arrange
       const mockParams = { page: 0, size: 10, type: undefined, categoryId: undefined };
       const mockResponse = { data: { content: [], totalElements: 0, totalPages: 0, number: 0, size: 10 } };
-      (apiClient.get as any).mockResolvedValue(mockResponse);
+      vi.mocked(apiClient.get).mockResolvedValue(mockResponse);
 
       // Act
       await listTransactions(mockParams);
@@ -54,7 +54,7 @@ describe('transactionApi', () => {
     it('should get correct endpoint', async () => {
       // Arrange
       const mockTx = { id: 100, title: 'Test' };
-      (apiClient.get as any).mockResolvedValue({ data: mockTx });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: mockTx });
 
       // Act
       const result = await getTransaction(100);
@@ -75,7 +75,7 @@ describe('transactionApi', () => {
         categoryId: 1, 
         txDate: '2026-05-10' 
       };
-      (apiClient.post as any).mockResolvedValue({ data: { ...mockData, id: 1 } });
+      vi.mocked(apiClient.post).mockResolvedValue({ data: { ...mockData, id: 1 } });
 
       // Act
       await createTransaction(mockData);
@@ -95,7 +95,7 @@ describe('transactionApi', () => {
         categoryId: 1, 
         txDate: '2026-05-10' 
       };
-      (apiClient.put as any).mockResolvedValue({ data: { ...mockData, id: 100 } });
+      vi.mocked(apiClient.put).mockResolvedValue({ data: { ...mockData, id: 100 } });
 
       // Act
       await updateTransaction(100, mockData);
@@ -108,7 +108,7 @@ describe('transactionApi', () => {
   describe('deleteTransaction', () => {
     it('should delete correct endpoint', async () => {
       // Arrange
-      (apiClient.delete as any).mockResolvedValue({});
+      vi.mocked(apiClient.delete).mockResolvedValue({});
 
       // Act
       await deleteTransaction(100);

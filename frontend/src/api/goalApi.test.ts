@@ -20,7 +20,7 @@ describe('goalApi Service', () => {
   describe('listGoals', () => {
     it('listGoals_shouldTransformCentimesToDisplayUnits', async () => {
       // Arrange
-      const mockApiResponse: any[] = [
+      const mockApiResponse: unknown[] = [
         {
           id: 1,
           title: 'Car',
@@ -53,7 +53,7 @@ describe('goalApi Service', () => {
         targetDate: '2027-01-01',
       };
       
-      const mockApiResponse: any = {
+      const mockApiResponse: unknown = {
         id: 2,
         title: 'New Goal',
         targetAmount: 500000,
@@ -82,7 +82,7 @@ describe('goalApi Service', () => {
       const goalId = 1;
       const contributionData = { amount: 200 }; // In display units
       
-      const mockApiResponse: any = {
+      const mockApiResponse: unknown = {
         id: 1,
         title: 'Car',
         targetAmount: 500000,
@@ -108,7 +108,7 @@ describe('goalApi Service', () => {
     it('getGoalProgress_shouldTransformGoalDataInResponse', async () => {
       // Arrange
       const goalId = 1;
-      const mockApiResponse: any = {
+      const mockApiResponse: unknown = {
         goalId: 1,
         title: 'Car Progress',
         targetAmount: 500000,
@@ -151,7 +151,7 @@ describe('goalApi Service', () => {
     it('getGoalProgress_shouldFallbackToGoalDataIfProgressFieldsMissing', async () => {
       // Arrange
       const goalId = 1;
-      const mockApiResponse: any = {
+      const mockApiResponse: unknown = {
         goalId: 0, // Assume 0 or null
         title: '',
         progressPercentage: 0,

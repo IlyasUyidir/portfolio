@@ -27,7 +27,7 @@ describe('categoryApi', () => {
 
   describe('listCategories', () => {
     it('should get from correct endpoint', async () => {
-      (apiClient.get as any).mockResolvedValue({ data: [mockCategory] });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: [mockCategory] });
 
       const result = await listCategories();
 
@@ -36,7 +36,7 @@ describe('categoryApi', () => {
     });
 
     it('should throw error on failure', async () => {
-      (apiClient.get as any).mockRejectedValue(new Error('Network Error'));
+      vi.mocked(apiClient.get).mockRejectedValue(new Error('Network Error'));
 
       await expect(listCategories()).rejects.toThrow('Network Error');
     });
@@ -45,7 +45,7 @@ describe('categoryApi', () => {
   describe('createCategory', () => {
     it('should post to correct endpoint', async () => {
       const data: CreateCategoryRequest = { name: 'Food', color: '#ff0000', type: 'DEPENSE' };
-      (apiClient.post as any).mockResolvedValue({ data: mockCategory });
+      vi.mocked(apiClient.post).mockResolvedValue({ data: mockCategory });
 
       const result = await createCategory(data);
 
@@ -57,7 +57,7 @@ describe('categoryApi', () => {
   describe('updateCategory', () => {
     it('should put to correct endpoint', async () => {
       const data: CreateCategoryRequest = { name: 'Food2', color: '#00ff00', type: 'DEPENSE' };
-      (apiClient.put as any).mockResolvedValue({ data: mockCategory });
+      vi.mocked(apiClient.put).mockResolvedValue({ data: mockCategory });
 
       const result = await updateCategory(1, data);
 
@@ -68,7 +68,7 @@ describe('categoryApi', () => {
 
   describe('deleteCategory', () => {
     it('should call delete on correct endpoint', async () => {
-      (apiClient.delete as any).mockResolvedValue({});
+      vi.mocked(apiClient.delete).mockResolvedValue({});
 
       await deleteCategory(1);
 

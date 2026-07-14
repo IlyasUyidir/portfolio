@@ -29,9 +29,9 @@ export const Budgets: React.FC = () => {
   });
 
   const { data: budgetsData, isLoading, error: fetchError, refetch } = useBudgets(month);
-  const budgets = budgetsData ?? [];
+  const budgets = useMemo(() => budgetsData ?? [], [budgetsData]);
   const { data: allCategoriesData } = useCategories();
-  const allCategories = allCategoriesData ?? [];
+  const allCategories = useMemo(() => allCategoriesData ?? [], [allCategoriesData]);
   const categories = useMemo(() => allCategories.filter(c => c.type !== 'REVENU'), [allCategories]);
 
   const { mutate: performSave, error: saveError } = useMutation(

@@ -42,7 +42,7 @@ export const Transactions: React.FC = () => {
   const categories = categoriesData ?? [];
 
   const { mutate: performSave, error: saveError } = useMutation(
-    async (formData: any) => {
+    async (formData: { title: string; amount: number; type: 'REVENU' | 'DEPENSE'; categoryId: number; txDate: string; description?: string }) => {
       if (formMode === 'create') {
         return await createTransaction(formData);
       } else if (formMode === 'edit' && transactionToEdit) {

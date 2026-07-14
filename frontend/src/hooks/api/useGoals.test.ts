@@ -19,8 +19,8 @@ describe('useGoals', () => {
   const mockProgress2 = { goal: mockGoal2, currentAmount: 1000, targetAmount: 2000, percentage: 50, milestones: [] };
 
   it('should return loading initially and then fetch goals and their progress on success', async () => {
-    (goalApi.listGoals as any).mockResolvedValue([mockGoal1, mockGoal2]);
-    (goalApi.getGoalProgress as any).mockImplementation((id: number) => {
+    vi.mocked(goalApi.listGoals).mockResolvedValue([mockGoal1, mockGoal2]);
+    vi.mocked(goalApi.getGoalProgress).mockImplementation((id: number) => {
       if (id === 1) return Promise.resolve(mockProgress1);
       if (id === 2) return Promise.resolve(mockProgress2);
       return Promise.reject(new Error('Not found'));
@@ -40,8 +40,8 @@ describe('useGoals', () => {
   });
 
   it('should handle partial failure of getGoalProgress correctly', async () => {
-    (goalApi.listGoals as any).mockResolvedValue([mockGoal1, mockGoal2]);
-    (goalApi.getGoalProgress as any).mockImplementation((id: number) => {
+    vi.mocked(goalApi.listGoals).mockResolvedValue([mockGoal1, mockGoal2]);
+    vi.mocked(goalApi.getGoalProgress).mockImplementation((id: number) => {
       if (id === 1) return Promise.resolve(mockProgress1);
       if (id === 2) return Promise.reject(new Error('Progress failed'));
       return Promise.reject(new Error('Not found'));
@@ -59,7 +59,7 @@ describe('useGoals', () => {
   });
 
   it('should return error if listGoals fails', async () => {
-    (goalApi.listGoals as any).mockRejectedValue(new Error('Goals error'));
+    vi.mocked(goalApi.listGoals).mockRejectedValue(new Error('Goals error'));
 
     const { result } = renderHook(() => useGoals());
 

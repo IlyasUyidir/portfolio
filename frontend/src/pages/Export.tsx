@@ -24,7 +24,7 @@ export const Export: React.FC = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err: any) {
+    } catch {
       setError("Erreur lors du téléchargement du fichier CSV");
     } finally {
       setIsCsvDownloading(false);
@@ -45,7 +45,7 @@ export const Export: React.FC = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err: any) {
+    } catch {
       setError("Erreur lors du téléchargement du fichier Excel");
     } finally {
       setIsExcelDownloading(false);

@@ -36,7 +36,7 @@ describe('budgetApi', () => {
   describe('createBudget', () => {
     it('should post to correct endpoint', async () => {
       const data: CreateBudgetRequest = { categoryId: 2, budgetYear: 2026, budgetMonth: 5, limitAmount: 50000, alertThreshold: 80 };
-      (apiClient.post as any).mockResolvedValue({ data: mockBudget });
+      vi.mocked(apiClient.post).mockResolvedValue({ data: mockBudget });
 
       const result = await createBudget(data);
 
@@ -46,7 +46,7 @@ describe('budgetApi', () => {
 
     it('should throw error on failure', async () => {
       const data: CreateBudgetRequest = { categoryId: 2, budgetYear: 2026, budgetMonth: 5, limitAmount: 50000, alertThreshold: 80 };
-      (apiClient.post as any).mockRejectedValue(new Error('Network Error'));
+      vi.mocked(apiClient.post).mockRejectedValue(new Error('Network Error'));
 
       await expect(createBudget(data)).rejects.toThrow('Network Error');
     });
@@ -54,7 +54,7 @@ describe('budgetApi', () => {
 
   describe('listBudgetsByMonth', () => {
     it('should get from correct endpoint', async () => {
-      (apiClient.get as any).mockResolvedValue({ data: [mockBudgetProgress] });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: [mockBudgetProgress] });
 
       const result = await listBudgetsByMonth('2026-05');
 
@@ -65,7 +65,7 @@ describe('budgetApi', () => {
 
   describe('getBudgetProgress', () => {
     it('should get from correct endpoint', async () => {
-      (apiClient.get as any).mockResolvedValue({ data: mockBudgetProgress });
+      vi.mocked(apiClient.get).mockResolvedValue({ data: mockBudgetProgress });
 
       const result = await getBudgetProgress(1);
 
@@ -76,7 +76,7 @@ describe('budgetApi', () => {
 
   describe('deleteBudget', () => {
     it('should call delete on correct endpoint', async () => {
-      (apiClient.delete as any).mockResolvedValue({});
+      vi.mocked(apiClient.delete).mockResolvedValue({});
 
       await deleteBudget(1);
 

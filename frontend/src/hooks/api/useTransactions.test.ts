@@ -21,7 +21,7 @@ describe('useTransactions', () => {
   };
 
   it('should return loading initially and then data on success', async () => {
-    (transactionApi.listTransactions as any).mockResolvedValue(mockTransactions);
+    vi.mocked(transactionApi.listTransactions).mockResolvedValue(mockTransactions);
 
     const { result } = renderHook(() => useTransactions({ type: 'DEPENSE' }, 0));
 
@@ -42,7 +42,7 @@ describe('useTransactions', () => {
   });
 
   it('should return error if API call fails', async () => {
-    (transactionApi.listTransactions as any).mockRejectedValue(new Error('Network error'));
+    vi.mocked(transactionApi.listTransactions).mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useTransactions({}, 1, 5));
 

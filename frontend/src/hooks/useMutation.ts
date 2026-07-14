@@ -25,7 +25,7 @@ export function useMutation<T, R>(
         options.onSuccess(result);
       }
       return result;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Mutation error:', err);
       const errorMessage = err.response?.data?.error ?? err.message ?? 'Une erreur est survenue';
       setError(errorMessage);

@@ -18,7 +18,7 @@ describe('useCategories', () => {
   };
 
   it('should return loading initially and then data on success', async () => {
-    (categoryApi.listCategories as any).mockResolvedValue([mockCategory]);
+    vi.mocked(categoryApi.listCategories).mockResolvedValue([mockCategory]);
 
     const { result } = renderHook(() => useCategories());
 
@@ -33,7 +33,7 @@ describe('useCategories', () => {
   });
 
   it('should return error if API call fails', async () => {
-    (categoryApi.listCategories as any).mockRejectedValue(new Error('Network error'));
+    vi.mocked(categoryApi.listCategories).mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useCategories());
 
