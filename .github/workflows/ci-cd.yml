@@ -147,7 +147,7 @@ jobs:
           script: |
             cd ~/portfolio
 
-	    git pull origin main
+            git pull origin main
 
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
