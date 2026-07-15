@@ -146,17 +146,18 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/portfolio
+
+	    git pull origin main
+
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             export GHCR_REPO="${{ needs.build-and-push.outputs.repo_lower }}"
             export SPRING_DATASOURCE_PASSWORD="${{ secrets.SPRING_DATASOURCE_PASSWORD }}"
             export JWT_SECRET="${{ secrets.JWT_SECRET }}"
-            # APP_CORS_ALLOWED_ORIGINS is not sensitive (just the public domain) —
-            # it lives in the VPS's own .env file and is intentionally NOT exported
-            # here, so it's never at risk of being blanked out by a missing secret.
+            export GRAFANA_ADMIN_PASSWORD="${{ secrets.GRAFANA_ADMIN_PASSWORD }}"
             export BACKEND_IMAGE_TAG=${{ github.sha }}
             export FRONTEND_IMAGE_TAG=${{ github.sha }}
 
-            docker compose -f docker-compose.prod.yml pull backend frontend
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
-            docker compose -f docker-compose.prod.yml ps
+            docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml pull backend frontend
+            docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml up -d --remove-orphans
+            docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml ps
