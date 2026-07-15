@@ -2,6 +2,11 @@ folio-ilyas.duckdns.org {
   handle /api/* {
     reverse_proxy backend:8080
   }
+
+  handle /grafana/* {
+    reverse_proxy grafana:3000
+  }
+
   handle {
     reverse_proxy frontend:80
   }
