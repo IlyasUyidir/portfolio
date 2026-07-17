@@ -118,7 +118,7 @@
       "targets": [{
         "refId": "A",
         "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\"portfolio-.+\"}[5m])) by (name)",
-        "legendFormat": "{{name}}"
+        "legendFormat": "{{id}}"
       }]
     },
     {
@@ -129,7 +129,7 @@
       "targets": [{
         "refId": "A",
         "expr": "container_memory_usage_bytes{name=~\"portfolio-.+\"}",
-        "legendFormat": "{{name}}"
+        "legendFormat": "{{id}}"
       }]
     },
 
