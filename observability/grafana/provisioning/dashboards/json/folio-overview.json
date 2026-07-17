@@ -1,0 +1,150 @@
+{
+  "title": "folio.io — Overview",
+  "uid": "folio-overview",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    { "type": "row", "title": "Application", "id": 100, "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 } },
+
+    {
+      "id": 1, "type": "timeseries", "title": "Request rate (req/s)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [{
+        "refId": "A",
+        "expr": "sum(rate(http_server_requests_seconds_count{application=\"folio-backend\"}[5m]))"
+      }]
+    },
+    {
+      "id": 2, "type": "timeseries", "title": "Error rate (% of requests, 5xx)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percent", "max": 100, "min": 0 }, "overrides": [] },
+      "targets": [{
+        "refId": "A",
+        "expr": "100 * sum(rate(http_server_requests_seconds_count{application=\"folio-backend\",status=~\"5..\"}[5m])) / sum(rate(http_server_requests_seconds_count{application=\"folio-backend\"}[5m]))"
+      }]
+    },
+
+    {
+      "id": 3, "type": "timeseries", "title": "p95 latency",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [{
+        "refId": "A",
+        "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"folio-backend\"}[5m])) by (le))"
+      }]
+    },
+    {
+      "id": 4, "type": "timeseries", "title": "JVM heap used",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "targets": [{
+        "refId": "A",
+        "expr": "sum(jvm_memory_used_bytes{application=\"folio-backend\",area=\"heap\"})"
+      }]
+    },
+
+    {
+      "id": 5, "type": "timeseries", "title": "GC pause time (rate)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [{
+        "refId": "A",
+        "expr": "rate(jvm_gc_pause_seconds_sum{application=\"folio-backend\"}[5m])"
+      }]
+    },
+    {
+      "id": 6, "type": "stat", "title": "Active DB connections (HikariCP)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [{
+        "refId": "A",
+        "expr": "hikaricp_connections_active{application=\"folio-backend\"}"
+      }]
+    },
+
+    { "type": "row", "title": "Host", "id": 101, "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 } },
+
+    {
+      "id": 7, "type": "timeseries", "title": "Host CPU usage (%)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 26 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percent", "max": 100, "min": 0 }, "overrides": [] },
+      "targets": [{
+        "refId": "A",
+        "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)"
+      }]
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Host memory used (%)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 26 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percent", "max": 100, "min": 0 }, "overrides": [] },
+      "targets": [{
+        "refId": "A",
+        "expr": "100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))"
+      }]
+    },
+    {
+      "id": 9, "type": "stat", "title": "Host disk free (/)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 34 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "decbytes" }, "overrides": [] },
+      "targets": [{
+        "refId": "A",
+        "expr": "node_filesystem_avail_bytes{mountpoint=\"/\"}"
+      }]
+    },
+
+    { "type": "row", "title": "Containers", "id": 102, "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 42 } },
+
+    {
+      "id": 10, "type": "timeseries", "title": "Container CPU usage by container",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 43 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] },
+      "targets": [{
+        "refId": "A",
+        "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\"portfolio-.+\"}[5m])) by (name)",
+        "legendFormat": "{{name}}"
+      }]
+    },
+    {
+      "id": 11, "type": "timeseries", "title": "Container memory usage by container",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 43 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "targets": [{
+        "refId": "A",
+        "expr": "container_memory_usage_bytes{name=~\"portfolio-.+\"}",
+        "legendFormat": "{{name}}"
+      }]
+    },
+
+    { "type": "row", "title": "Logs", "id": 103, "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 51 } },
+
+    {
+      "id": 12, "type": "logs", "title": "Recent errors — all containers",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 52 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true },
+      "targets": [{
+        "refId": "A",
+        "expr": "{container=~\".+\"} |~ \"(?i)error|exception\""
+      }]
+    }
+  ]
+}
