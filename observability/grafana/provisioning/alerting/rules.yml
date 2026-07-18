@@ -1,0 +1,66 @@
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: folio-core-alerts
+    folder: Folio Alerts
+    interval: 1m
+    rules:
+      - uid: folio-backend-down
+        title: Backend down
+        condition: C
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            model:
+              expr: up{job="folio-backend"} == 0
+              instant: true
+            relativeTimeRange:
+              from: 300
+              to: 0
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0]
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "folio-backend is not responding to Prometheus scrapes"
+        noDataState: Alerting
+        execErrState: Alerting
+
+      - uid: folio-5xx-spike
+        title: 5xx error rate spike
+        condition: C
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            model:
+              expr: >
+                (sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m]))
+                / sum(rate(http_server_requests_seconds_count[5m])) or vector(0)) * 100
+              instant: true
+            relativeTimeRange:
+              from: 300
+              to: 0
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [5]
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "5xx rate above 5% for 2+ minutes"
+        noDataState: OK
+        execErrState: Alerting
