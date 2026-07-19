@@ -12,7 +12,7 @@ groups:
           - refId: A
             datasourceUid: prometheus
             model:
-              expr: up{job="folio-backend"} == 0
+              expr: up{job="folio-backend"}
               instant: true
             relativeTimeRange:
               from: 300
