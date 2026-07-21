@@ -1,0 +1,6 @@
+deploy_user: deploy
+deploy_group: deploy
+app_dir: /opt/folio
+repo_url: https://github.com/IlyasUyidir/portfolio
+repo_branch: main
+deploy_ssh_public_key_path: ~/.ssh/id_ed25519.pub

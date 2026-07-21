@@ -1,0 +1,161 @@
+---
+- name: Configure Folio.io host (Milestone 5, Phase 2)
+  hosts: folio_vm
+  become: true
+  vars_files:
+    - group_vars/all/vars.yml
+    - group_vars/all/vault.yml
+
+  tasks:
+
+    # ---- 1. Base system update ----
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      register: apt_update_result
+      retries: 10
+      delay: 15
+      until: apt_update_result is succeeded
+
+    - name: Upgrade all packages
+      ansible.builtin.apt:
+        upgrade: dist
+      register: apt_upgrade_result
+      retries: 10
+      delay: 15
+      until: apt_upgrade_result is succeeded
+
+    - name: Install base prerequisites
+      ansible.builtin.apt:
+        name:
+          - curl
+          - ca-certificates
+          - gnupg
+          - ufw
+          - git
+          - acl
+        state: present
+      register: prereq_result
+      retries: 10
+      delay: 15
+      until: prereq_result is succeeded
+
+    # ---- 2. Docker Engine (deb822 format - current recommended method) ----
+    - name: Add Docker apt repository
+      ansible.builtin.deb822_repository:
+        name: docker
+        types: deb
+        uris: https://download.docker.com/linux/ubuntu
+        suites: "{{ ansible_facts['distribution_release'] }}"
+        components: stable
+        architectures: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
+        signed_by: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Install Docker Engine + Compose plugin
+      ansible.builtin.apt:
+        update_cache: true
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+      register: docker_install_result
+      retries: 10
+      delay: 15
+      until: docker_install_result is succeeded
+
+    - name: Ensure Docker is running and enabled
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    # ---- 3. Deploy user ----
+    - name: Create deploy group
+      ansible.builtin.group:
+        name: "{{ deploy_group }}"
+        state: present
+
+    - name: Create deploy user
+      ansible.builtin.user:
+        name: "{{ deploy_user }}"
+        group: "{{ deploy_group }}"
+        groups: docker,sudo
+        append: true
+        shell: /bin/bash
+        create_home: true
+
+    - name: Authorize your local SSH key for the deploy user
+      ansible.posix.authorized_key:
+        user: "{{ deploy_user }}"
+        state: present
+        key: "{{ lookup('file', deploy_ssh_public_key_path) }}"
+
+    - name: Allow passwordless sudo for the deploy user
+      ansible.builtin.copy:
+        dest: "/etc/sudoers.d/{{ deploy_user }}"
+        content: "{{ deploy_user }} ALL=(ALL) NOPASSWD:ALL\n"
+        mode: "0440"
+        validate: "visudo -cf %s"
+
+    # ---- 4. Firewall ----
+    - name: Allow SSH through ufw
+      community.general.ufw:
+        rule: allow
+        name: OpenSSH
+
+    - name: Allow HTTP through ufw
+      community.general.ufw:
+        rule: allow
+        port: "80"
+        proto: tcp
+
+    - name: Allow HTTPS through ufw
+      community.general.ufw:
+        rule: allow
+        port: "443"
+        proto: tcp
+
+    - name: Enable ufw
+      community.general.ufw:
+        state: enabled
+        policy: deny
+
+    # ---- 5. Application directory + repo ----
+    - name: Ensure app directory exists and is owned by deploy user
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_group }}"
+        mode: "0755"
+
+    - name: Clone (or update) the Folio.io repo
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ app_dir }}"
+        version: "{{ repo_branch }}"
+      become_user: "{{ deploy_user }}"
+
+    # ---- 6. Secrets: rendered from Vault, never plaintext in the repo ----
+    - name: Place .env file from Vault-encrypted values
+      ansible.builtin.template:
+        src: templates/env.j2
+        dest: "{{ app_dir }}/.env"
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_group }}"
+        mode: "0600"
+
+    # ---- 7. Application Deployment (Milestone 5, Phase 3) ----
+    - name: Build and deploy Folio.io application stack via Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: "{{ app_dir }}"
+        files:
+          - docker-compose.prod.yml
+          - docker-compose.observability.yml
+        state: present
+        remove_orphans: true
+      become_user: "{{ deploy_user }}"
