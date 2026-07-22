@@ -147,6 +147,9 @@ data "oci_core_images" "ubuntu_arm" {
 }
 
 resource "oci_core_instance" "folio_vm" {
+  metadata = {
+    ssh_authorized_keys = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGSvbfnTTYFPYG0DmCsZxP+397+E6/mMFTmJoIMzvve0 mac@Ilyas-MacBook"
+  }
   compartment_id      = var.compartment_id
   availability_domain = "MooX:AF-CASABLANCA-1-AD-1"
   display_name        = "portfolio-vm"
