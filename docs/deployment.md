@@ -23,7 +23,7 @@ To ensure stability, the pipeline runs tests on every push and pull request to `
 ### Stage 2: Build & Push (GHCR)
 Triggered only on pushes to the `main` branch.
 - **Authentication**: Logs into GHCR using the **built-in `GITHUB_TOKEN`** (not `GHCR_PAT`). `GITHUB_TOKEN` is automatically granted `packages: write` by the job's `permissions` block.
-- **Multi-Platform Support**: Uses `docker/setup-qemu-action` and `docker/setup-buildx-action` to build images for both `linux/amd64` and `linux/arm64`.
+- **Single-Platform (ARM64)**: Uses `docker/setup-qemu-action` and `docker/setup-buildx-action` to build images for **`linux/arm64` only**. This is intentional: the production VPS is an Oracle Cloud `VM.Standard.A1.Flex` ARM64 instance, so no `amd64` image is required. If you need to run this stack on an x86 machine you must either re-add `linux/amd64` to the `platforms:` field in each `build-and-push` step or pull using emulation.
 - **Registry**: Images are pushed to **GitHub Container Registry (GHCR)**.
 - **Tagging Strategy**: Every image is tagged with both the unique Git commit SHA (`${{ github.sha }}`) and the `latest` tag.
 - **Caching**: Uses `type=gha` cache to speed up subsequent builds.
@@ -34,13 +34,14 @@ The deployment is gated by a **GitHub Environment (`production`)**, requiring a 
 
 **The Deployment Process:**
 1. **SSH Access**: The pipeline connects to the VPS using `appleboy/ssh-action` via an SSH key.
-2. **Code Update**: Performs a `git pull origin main` on the VPS to update the compose files and Caddyfile.
+2. **Code Update**: `cd`s into `/opt/folio` and performs a `git pull origin main` to update the compose files and Caddyfile.
 3. **Auth**: Logs into GHCR using `GHCR_PAT` (a Personal Access Token with `read:packages` scope only — used to pull images, not push them).
 4. **Update**:
     - Exports `GHCR_REPO`, `SPRING_DATASOURCE_PASSWORD`, `JWT_SECRET`, `GRAFANA_ADMIN_PASSWORD`, `BACKEND_IMAGE_TAG`, and `FRONTEND_IMAGE_TAG` as shell env vars.
     - Pulls the latest images for `backend` and `frontend`.
     - Executes `docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml up -d --remove-orphans`.
     - Force-recreates the `caddy` container (`--force-recreate --no-deps caddy`) to guarantee that any Caddyfile inode change is picked up (see `troubleshooting.md` → *Caddy Silently Ignoring Caddyfile Changes*).
+    - Force-recreates the `grafana` container (`--force-recreate --no-deps grafana`) to ensure environment variable changes (e.g. `GF_SERVER_ROOT_URL`) always take effect. Without this, Docker would not restart Grafana if the image tag had not changed.
     - Runs `docker compose ps` to confirm all containers are healthy.
 5. **Failure Gate**: The remote script runs under `set -e`; any failed command aborts the deploy and fails the GitHub Action.
 
@@ -72,7 +73,7 @@ Because images are tagged with the Git SHA, rolling back is straightforward in p
 1. Identify the last stable Git SHA from `git log` or the GitHub Actions run history.
 2. On the VPS, export the old SHA as both image tags and re-run the stack:
    ```bash
-   cd ~/portfolio
+   cd /opt/folio
    export GHCR_REPO="ilyasuyidir/portfolio"
    export SPRING_DATASOURCE_PASSWORD="<from .env or GitHub Secrets>"
    export JWT_SECRET="<from .env or GitHub Secrets>"
@@ -82,5 +83,6 @@ Because images are tagged with the Git SHA, rolling back is straightforward in p
    docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml pull backend frontend
    docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml up -d --remove-orphans
    docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml up -d --force-recreate --no-deps caddy
+   docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml up -d --force-recreate --no-deps grafana
    ```
 3. **If the rollback target includes a Caddyfile change**: also check out the old Caddyfile revision on the VPS (or restore from backup), then force-recreate Caddy as shown above. A plain `caddy reload` will not reliably apply Caddyfile changes after a file replacement — see `troubleshooting.md` for the inode bind-mount issue.

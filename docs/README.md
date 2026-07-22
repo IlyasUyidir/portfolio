@@ -14,6 +14,7 @@ for a developer or operator onboarding onto a fresh machine.
 | `architecture.md`    | Engineers/internals  | High-level topology, request flow, data model, diagrams      |
 | `troubleshooting.md` | On-call/runbook      | Known errors, diagnostics, fixes                             |
 | `deployment.md`      | Release engineer     | CI/CD pipeline, images, deploy to VPS, rollback              |
+| `infrastructure.md`  | Operator/DevOps      | Terraform (OCI VCN + VM), Ansible (Docker, UFW, deploy user, vault, initial deploy) |
 | `observability.md`   | On-call/SRE          | Prometheus, Loki, Grafana, alerting, dashboards              |
 | `secrets.md`         | Operator/SecOps.md`  | All required secrets/env vars, how to generate, where stored |
 | `database.md`        | DB / Backend         | Flyway migrations, schema overview, backup/restore           |
@@ -38,6 +39,7 @@ for a developer or operator onboarding onto a fresh machine.
 - [x] `secrets.md`
 - [x] `database.md`
 - [x] `networking.md`
+- [x] `infrastructure.md` (Terraform + Ansible — added post-audit)
 
 ---
 
@@ -61,7 +63,8 @@ writing pass does not need to re-discover them.
   bind-mounted and `caddy_data`/`caddy_config` volumes.
 - `docker-compose.observability.yml` — monitoring stack, stacked on top of
   prod compose. Services: `prometheus:v3.0.1` (9090), `node-exporter:v1.8.2`
-  (9100, host pid/proc/sys mounts), `cadvisor:v0.49.1` (8080, privileged),
+  (9100, host pid/proc/sys mounts), `ghcr.io/google/cadvisor:0.54.0` (8080,
+  privileged, `--docker_only=true --disable_metrics=disk --housekeeping_interval=15s`),
   `loki:3.3.0` (3100), `promtail:3.3.0` (docker socket + container logs),
   `grafana:11.4.0` (3000, admin password from env, root URL
   `https://folio-ilyas.duckdns.org/grafana/`, sub-path serve). Mem limits set
@@ -175,7 +178,7 @@ From `.env.example` + CI `secrets.*` + compose env: `JWT_SECRET`,
 
 ### Git
 
-- remote: `git@github.com:IlyasUyidir/portfolio.git`
+- remote: `https://github.com/IlyasUyidir/portfolio` (HTTPS; VPS clones over HTTPS, not SSH)
 - main branch deploys; PR branches trigger tests but no build/deploy.
 - feature branches naming: `fix/block-N-...` (seen in remotes).
 
