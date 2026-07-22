@@ -146,7 +146,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            cd ~/portfolio
+            cd /opt/folio
 
             git pull origin main
 
