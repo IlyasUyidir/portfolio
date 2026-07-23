@@ -1,0 +1,16 @@
+title = "folio.io gitleaks config"
+
+# Extend the default rule set rather than replacing it — we only want to
+# add exceptions for known-fake CI test values, not weaken real detection.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "CI-only test placeholders, never real credentials"
+regexes = [
+  '''test_password_ci_only''',
+  '''ci_test_secret_do_not_use_in_prod_1234567890''',
+]
+paths = [
+  '''.github/workflows/ci-cd.yml''',
+]
