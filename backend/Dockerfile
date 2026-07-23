@@ -2,8 +2,6 @@
 FROM --platform=$BUILDPLATFORM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
-
-
 # Cache dependencies first
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
@@ -14,9 +12,9 @@ RUN mvn clean package -DskipTests -B
 
 # ── Stage 2: Run ────────────────────────────────
 
-FROM eclipse-temurin:17.0.12_7-jre-jammy
+FROM eclipse-temurin:17-jre-alpine
 
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 

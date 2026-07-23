@@ -31,6 +31,17 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
+
+      # <-- ADDED THIS BLOCK -->
+      - name: Set up JDK 17
+        if: matrix.language == 'java-kotlin'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      # <---------------------->
+
       - name: Build Java backend
         if: matrix.language == 'java-kotlin'
         working-directory: backend
