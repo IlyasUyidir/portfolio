@@ -33,7 +33,7 @@ Folio.io is a freemium finance tracker with **Standard** and **Premium** tiers:
 | **Database** | PostgreSQL 15 |
 | **Reverse proxy** | Caddy 2 (automatic HTTPS via Let's Encrypt) |
 | **Container runtime** | Docker · Docker Compose |
-| **CI/CD** | GitHub Actions · GitHub Container Registry (GHCR) · multi-arch images (amd64 + arm64) |
+| **CI/CD** | GitHub Actions · GitHub Container Registry (GHCR) · ARM64 images (`linux/arm64`) · Trivy image scanning |
 | **Observability** | Prometheus 3.0.1 · Loki 3.3.0 · Grafana 11.4.0 · Promtail · Node Exporter · cAdvisor |
 | **Testing** | JUnit 5 · Mockito · Spring MockMvc · Vitest · Testing Library |
 
@@ -66,7 +66,7 @@ All services run on a private Docker bridge network; only Caddy ports 80/443 are
 Every push to `main` triggers a fully automated pipeline:
 
 1. **Test** — backend (JUnit/Spring against an ephemeral Postgres 15 container) and frontend (Vitest + ESLint) run in parallel.
-2. **Build & push** — multi-platform Docker images (`linux/amd64` + `linux/arm64`) are built and pushed to GHCR, tagged with the Git SHA and `latest`.
+2. **Build & push** — ARM64 Docker images (`linux/arm64`) are built and pushed to GHCR, tagged with the Git SHA and `latest`. Images are security-scanned with **Trivy** (HIGH/CRITICAL gate, unfixed CVEs only) before deploy proceeds.
 3. **Deploy** — SSH into the production VPS, pull new images, and restart the stack with `docker-compose.prod.yml` + `docker-compose.observability.yml`. This stage is **gated by a manual approval** via a GitHub Environment (`production`) before it runs.
 
 → Full pipeline breakdown and rollback runbook: [docs/deployment.md](docs/deployment.md)

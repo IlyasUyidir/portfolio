@@ -28,6 +28,7 @@ Triggered only on pushes to the `main` branch.
 - **Tagging Strategy**: Every image is tagged with both the unique Git commit SHA (`${{ github.sha }}`) and the `latest` tag.
 - **Caching**: Uses `type=gha` cache to speed up subsequent builds.
 - **Frontend Build-Arg**: `VITE_API_BASE_URL=https://folio-ilyas.duckdns.org/api/v1` is baked into the frontend image at build time.
+- **Security Scanning (Gate)**: After both images are pushed to GHCR, **Trivy** (`aquasecurity/trivy-action@v0.36.0`) scans each image for HIGH and CRITICAL vulnerabilities (`exit-code: 1`, `ignore-unfixed: true`). If either image contains unfixed HIGH/CRITICAL CVEs, the pipeline fails here and the `deploy-production` job is blocked. This is the security gate between registry push and production deploy.
 
 ### Stage 3: Production Deployment
 The deployment is gated by a **GitHub Environment (`production`)**, requiring a manual reviewer approval before proceeding.
