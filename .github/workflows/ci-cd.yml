@@ -15,7 +15,7 @@ jobs:
   secret-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # full history, not just the diff — Gitleaks needs this
       - name: Gitleaks scan
@@ -40,7 +40,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -59,7 +59,7 @@ jobs:
   test-frontend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -86,7 +86,7 @@ jobs:
     outputs:
       repo_lower: ${{ steps.repo-name.outputs.lower }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up QEMU (for arm64 builds)
         uses: docker/setup-qemu-action@v3
