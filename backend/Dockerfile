@@ -11,9 +11,9 @@ COPY src ./src
 RUN mvn clean package -DskipTests -B
 
 # ── Stage 2: Run ────────────────────────────────
+FROM amazoncorretto:17-alpine-jre
 
-FROM eclipse-temurin:17-jre-alpine
-
+# Alpine uses addgroup/adduser instead of groupadd/useradd
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
