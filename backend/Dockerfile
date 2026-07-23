@@ -23,23 +23,7 @@ RUN apk add --no-cache binutils
 #   jdeps --multi-release 17 --ignore-missing-deps -q -recursive \
 #          --print-module-deps target/app.jar
 RUN jlink \
-    --add-modules \
-        java.base,\
-        java.compiler,\
-        java.desktop,\
-        java.instrument,\
-        java.management,\
-        java.naming,\
-        java.net.http,\
-        java.rmi,\
-        java.scripting,\
-        java.security.jgss,\
-        java.security.sasl,\
-        java.sql,\
-        java.xml,\
-        jdk.crypto.ec,\
-        jdk.naming.dns,\
-        jdk.unsupported \
+    --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql,java.xml,jdk.crypto.ec,jdk.naming.dns,jdk.unsupported \
     --strip-debug \
     --no-man-pages \
     --no-header-files \
