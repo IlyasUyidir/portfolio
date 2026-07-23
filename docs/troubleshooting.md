@@ -108,3 +108,53 @@ compactor:
 ```
 
 > **Current status**: This fix has already been applied in the repo. This runbook entry is preserved so the root cause is understood if it re-appears after a config rollback.
+
+---
+
+## 5. Docker Image & Build Issues
+
+### Trivy Scan Fails: OS-Level HIGH/CRITICAL CVEs in Frontend Image
+**Symptom**: The `Scan frontend image with Trivy` step in CI fails with `exit code 1`. The report shows 30+ HIGH/CRITICAL CVEs in packages like `openssl`, `musl`, `libexpat`, `libpng`, `libxml2`, `zlib`, `nghttp2`, `c-ares`.
+
+**Root Cause**: The frontend runtime image was pinned to a specific Nginx minor tag (e.g., `nginx:1.27-alpine`). That tag locks to a specific Alpine patch release (e.g., Alpine 3.21.3). As CVEs are discovered and patched in Alpine's package repository, the pinned tag is **not updated** — the image silently accumulates unfixed OS-level vulnerabilities. None of these are in the application code itself.
+
+**Fix**: Switch the runtime base image to `nginx:stable-alpine` (tracks the latest stable Nginx on the latest Alpine minor) and add `apk upgrade --no-cache` immediately after to guarantee all installed OS packages are at their latest patched version at build time:
+```dockerfile
+FROM nginx:stable-alpine
+RUN apk upgrade --no-cache
+```
+
+> **Current status**: Already applied in `frontend/Dockerfile`. This entry documents the pattern so it can be quickly diagnosed if a future image tag or Alpine version introduces new OS CVEs.
+
+---
+
+### jlink Build Fails: `Error: invalid argument`
+**Symptom**: The `jre-build` stage in `backend/Dockerfile` fails with:
+```
+Error: invalid argument: java.compiler, java.desktop, java.instrument, ...
+Usage: jlink <options> --module-path <modulepath> --add-modules <module>[,<module>...]
+```
+
+**Root Cause**: The `--add-modules` value was written using multi-line shell `\` continuations:
+```dockerfile
+RUN jlink \
+    --add-modules \
+        java.base,\
+        java.compiler,\   # ← shell joins this as "java.base,        java.compiler,"
+```
+Shell `\<newline>` continuation removes the newline but **preserves all leading whitespace on the next line**. `jlink` splits its arguments on both commas **and whitespace**, so `java.compiler` becomes a separate, unknown positional argument rather than part of the module list.
+
+**Fix**: Put the entire `--add-modules` value on a single unbroken line — no internal line continuations:
+```dockerfile
+RUN jlink \
+    --add-modules java.base,java.compiler,java.desktop,java.instrument,... \
+    --strip-debug \
+    --no-man-pages \
+    --no-header-files \
+    --compress=2 \
+    --output /opt/jre
+```
+The other flags can still use `\` continuations safely because each flag is self-contained per line.
+
+> **Current status**: Already applied in `backend/Dockerfile`. If the module list is ever edited, ensure it remains a single comma-separated string with no embedded spaces.
+
