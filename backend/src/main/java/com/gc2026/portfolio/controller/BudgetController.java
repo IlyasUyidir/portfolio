@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.YearMonth;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.validation.annotation.Validated;
@@ -40,12 +39,8 @@ public class BudgetController {
             HttpServletRequest httpRequest,
             @PathVariable @Pattern(regexp = "^\\d{4}-(0[1-9]|1[0-2])$", message = "Month must be in YYYY-MM format") String month) {
         Long userId = (Long) httpRequest.getAttribute("userId");
-        try {
-            YearMonth yearMonth = YearMonth.parse(month);
-            return ResponseEntity.ok(budgetService.getBudgetsByMonth(userId, yearMonth));
-        } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        YearMonth yearMonth = YearMonth.parse(month);
+        return ResponseEntity.ok(budgetService.getBudgetsByMonth(userId, yearMonth));
     }
 
     @GetMapping("/{id}/progress")

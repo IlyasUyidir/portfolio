@@ -165,8 +165,10 @@ class GoalControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("4. createGoal_whenStandardUserLimitReached_shouldReturn400")
-    void createGoal_whenStandardUserLimitReached_shouldReturn400() throws Exception {
+    // I-5: ValidationException (business-rule violation) → 409 Conflict, not 400.
+    // Updated from isBadRequest() to isConflict() — old code would have returned 400 here.
+    @DisplayName("4. createGoal_whenStandardUserLimitReached_shouldReturn409")
+    void createGoal_whenStandardUserLimitReached_shouldReturn409() throws Exception {
         // Arrange
         CreateGoalRequest request = new CreateGoalRequest();
         request.setTitle("Vacances");
@@ -183,8 +185,9 @@ class GoalControllerTest {
                         .requestAttr("userRole", "STANDARD")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Standard users can only have 1 active goal"));
+                .andExpect(status().isConflict())   // 409 — was 400 before I-5 fix
+                .andExpect(jsonPath("$.error").value("Standard users can only have 1 active goal"))
+                .andExpect(jsonPath("$.type").value("BUSINESS_RULE_VIOLATION"));
     }
 
     // --- GET /api/v1/goals ---
@@ -228,8 +231,10 @@ class GoalControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("7. addContribution_whenGoalAlreadyAchieved_shouldReturn400")
-    void addContribution_whenGoalAlreadyAchieved_shouldReturn400() throws Exception {
+    // I-5: ValidationException (business-rule violation) → 409 Conflict, not 400.
+    // Updated from isBadRequest() to isConflict() — old code would have returned 400 here.
+    @DisplayName("7. addContribution_whenGoalAlreadyAchieved_shouldReturn409")
+    void addContribution_whenGoalAlreadyAchieved_shouldReturn409() throws Exception {
         // Arrange
         ContributeRequest request = new ContributeRequest();
         request.setAmount(50000L);
@@ -243,8 +248,9 @@ class GoalControllerTest {
                         .requestAttr("userId", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Cannot contribute to an already achieved goal"));
+                .andExpect(status().isConflict())   // 409 — was 400 before I-5 fix
+                .andExpect(jsonPath("$.error").value("Cannot contribute to an already achieved goal"))
+                .andExpect(jsonPath("$.type").value("BUSINESS_RULE_VIOLATION"));
     }
 
     @Test
