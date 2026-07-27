@@ -225,5 +225,53 @@ class BudgetControllerTest {
                         .requestAttr("userId", 1L))
                 .andExpect(status().isNotFound());
     }
+
+    // ─── I-4 regression: @Min(1) @Max(12) on budgetMonth ─────────────────────────
+
+    /**
+     * I-4 regression: The old code had a manual range check in BudgetService that only
+     * fired AFTER database calls were already being set up (category lookup etc.).
+     * The new code uses @Min(1) @Max(12) on CreateBudgetRequest.budgetMonth and rejects
+     * the request at the DTO-binding layer (before any service method is called).
+     *
+     * These tests verify the 400 response comes from DTO validation, not from the service layer.
+     */
+    @Test
+    @WithMockUser
+    @DisplayName("I-4: createOrUpdate with budgetMonth=0 should return 400 (DTO validation)")
+    void createOrUpdate_whenBudgetMonthZero_shouldReturn400() throws Exception {
+        CreateBudgetRequest request = new CreateBudgetRequest();
+        request.setCategoryId(10L);
+        request.setBudgetYear(2026);
+        request.setBudgetMonth(0);  // invalid: below @Min(1)
+        request.setLimitAmount(200000L);
+
+        mockMvc.perform(post("/api/v1/budgets")
+                        .with(csrf())
+                        .requestAttr("userId", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.type").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("I-4: createOrUpdate with budgetMonth=13 should return 400 (DTO validation)")
+    void createOrUpdate_whenBudgetMonthThirteen_shouldReturn400() throws Exception {
+        CreateBudgetRequest request = new CreateBudgetRequest();
+        request.setCategoryId(10L);
+        request.setBudgetYear(2026);
+        request.setBudgetMonth(13);  // invalid: above @Max(12)
+        request.setLimitAmount(200000L);
+
+        mockMvc.perform(post("/api/v1/budgets")
+                        .with(csrf())
+                        .requestAttr("userId", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.type").value("VALIDATION_ERROR"));
+    }
 }
 

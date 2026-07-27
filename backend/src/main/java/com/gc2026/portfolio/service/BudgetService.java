@@ -35,9 +35,8 @@ public class BudgetService {
         if (request.getLimitAmount() <= 0) {
             throw new ValidationException("Budget limit must be strictly positive");
         }
-        if (request.getBudgetMonth() < 1 || request.getBudgetMonth() > 12) {
-            throw new ValidationException("Invalid month");
-        }
+        // I-4: budgetMonth range (1-12) is now enforced by @Min(1) @Max(12) on CreateBudgetRequest,
+        // so no manual check is needed here.
 
         Category category = categoryRepository.findByIdAndUserIdOrSystem(request.getCategoryId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));

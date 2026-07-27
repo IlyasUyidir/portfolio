@@ -1,5 +1,7 @@
 package com.gc2026.portfolio.dto.request;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
@@ -14,6 +16,8 @@ public class CreateBudgetRequest {
     private Integer budgetYear;
 
     @NotNull(message = "Budget month is required")
+    @Min(value = 1, message = "Budget month must be between 1 and 12")
+    @Max(value = 12, message = "Budget month must be between 1 and 12")
     private Integer budgetMonth;
 
     @NotNull(message = "Limit amount is required")
