@@ -1,6 +1,7 @@
 package com.gc2026.portfolio.domain.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ public class GoalContribution {
     private Goal goal;
 
     @Column(nullable = false)
+    @Positive(message = "Contribution amount must be positive")
     private Long amount;
 
     @Column(name = "contribution_date", nullable = false)

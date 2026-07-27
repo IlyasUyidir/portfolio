@@ -5,7 +5,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "categories")
+// I-8: Declare uniqueConstraint matching DB constraint unique_user_category so H2-based tests
+// can validate duplicate-insert bugs that would otherwise only surface in production.
+@Table(name = "categories", uniqueConstraints = {
+    @UniqueConstraint(name = "unique_user_category", columnNames = {"user_id", "name"})
+})
 @Getter
 @Setter
 @NoArgsConstructor

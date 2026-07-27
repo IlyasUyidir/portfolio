@@ -95,9 +95,9 @@ public class CategoryService {
             throw new ValidationException("System categories cannot be deleted");
         }
 
-        // C-2: Use existsByCategoryId (not existsByCategoryId) so that
+        // C-2: Use existsByCategoryIdAndIsDeletedFalse (not existsByCategoryId) so that
         // categories whose transactions are all soft-deleted can be deleted correctly.
-        if (transactionRepository.existsByCategoryId(catId)) {
+        if (transactionRepository.existsByCategoryIdAndIsDeletedFalse(catId)) {
             throw new ValidationException("Cannot delete category with existing transactions");
         }
 

@@ -1,6 +1,7 @@
 package com.gc2026.portfolio.domain.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 import java.time.LocalDateTime;
 
@@ -33,6 +34,7 @@ public class Budget {
     private Integer budgetMonth;
 
     @Column(name = "limit_amount", nullable = false)
+    @Positive(message = "Budget limit amount must be positive")
     private Long limitAmount;
 
     @Column(name = "alert_threshold", nullable = false)

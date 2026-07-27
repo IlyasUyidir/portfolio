@@ -216,7 +216,7 @@ class CategoryServiceTest {
     void delete_whenCategoryHasTransactions_shouldThrowValidationException() {
         // Arrange
         when(categoryRepository.findByIdAndUserId(5L, userId)).thenReturn(Optional.of(customCat));
-        when(transactionRepository.existsByCategoryId(5L)).thenReturn(true);
+        when(transactionRepository.existsByCategoryIdAndIsDeletedFalse(5L)).thenReturn(true);
 
         // Act & Assert
         ValidationException exception = assertThrows(ValidationException.class,
@@ -239,7 +239,7 @@ class CategoryServiceTest {
     void delete_whenValidCustomCategory_shouldDeleteSuccessfully() {
         // Arrange
         when(categoryRepository.findByIdAndUserId(5L, userId)).thenReturn(Optional.of(customCat));
-        when(transactionRepository.existsByCategoryId(5L)).thenReturn(false);
+        when(transactionRepository.existsByCategoryIdAndIsDeletedFalse(5L)).thenReturn(false);
 
         // Act
         categoryService.delete(userId, 5L);
@@ -287,6 +287,39 @@ class CategoryServiceTest {
         verify(categoryRepository, never()).countByUserIdAndIsSystemFalseForUpdate(any());
     }
 
+    /**
+     * C-2 regression: Old code called existsByCategoryId which included soft-deleted
+     * transactions, permanently blocking category deletion.
+     *
+     * Fixed behavior: when ALL transactions are soft-deleted
+     * (existsByCategoryIdAndIsDeletedFalse returns false), the category CAN be deleted.
+     *
+     * This test would FAIL on the old code (old method returned true for soft-deleted
+     * transactions, throwing ValidationException) and PASS after the C-2 fix.
+     */
+    @Test
+    @DisplayName("C-2: delete - should ALLOW deletion when all transactions are soft-deleted")
+    void delete_whenCategoryHasOnlySoftDeletedTransactions_shouldAllowDeletion() {
+        // Arrange
+        when(categoryRepository.findByIdAndUserId(5L, userId)).thenReturn(Optional.of(customCat));
+        // C-2 fix: only non-deleted transactions are checked
+        when(transactionRepository.existsByCategoryIdAndIsDeletedFalse(5L)).thenReturn(false); // all soft-deleted
+
+        // Act & Assert — should NOT throw; category is deletable
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> categoryService.delete(userId, 5L));
+        verify(categoryRepository).delete(customCat);
+    }
+
+    @Test
+    @DisplayName("delete - should block deletion when active (non-deleted) transactions exist")
+    void delete_whenCategoryHasActiveTransactions_shouldBlockDeletion() {
+        // Arrange
+        when(categoryRepository.findByIdAndUserId(5L, userId)).thenReturn(Optional.of(customCat));
+        when(transactionRepository.existsByCategoryIdAndIsDeletedFalse(5L)).thenReturn(true); // active transactions exist
+
+        // Act & Assert
+        assertThrows(ValidationException.class, () -> categoryService.delete(userId, 5L));
+    }
     // --- IDOR SECURITY ---
 
     @Test

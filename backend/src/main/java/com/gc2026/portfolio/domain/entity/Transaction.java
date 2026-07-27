@@ -2,6 +2,7 @@ package com.gc2026.portfolio.domain.entity;
 
 import com.gc2026.portfolio.domain.enums.TransactionType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -27,6 +28,7 @@ public class Transaction {
     private String title;
 
     @Column(nullable = false)
+    @Positive(message = "Transaction amount must be positive")
     private Long amount; // in centimes
 
     @Enumerated(EnumType.STRING)
