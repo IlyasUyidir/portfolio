@@ -18,7 +18,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
 
     Optional<Transaction> findByIdAndUserIdAndIsDeletedFalse(Long id, Long userId);
 
-    boolean existsByCategoryId(Long categoryId);
+    /**
+     * C-2: Was existsByCategoryId — which included soft-deleted transactions,
+     * permanently blocking users from deleting categories after soft-deleting all transactions.
+     * Fixed to only count non-deleted transactions.
+     */
+    boolean existsByCategoryIdAndIsDeletedFalse(Long categoryId);
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
            "WHERE t.userId = :userId " +
@@ -60,5 +65,18 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
-    List<Transaction> findAllByUserIdAndIsDeletedFalseOrderByTxDateDesc(Long userId);
+    /**
+     * C-5 (scope-adjusted): JOIN FETCH category eliminates the N+1 avalanche that fired
+     * 100k SELECT statements per export call. The full streaming rewrite (Pageable loop +
+     * HttpServletResponse streaming) is deliberately deferred.
+     *
+     * TODO: full streaming rewrite if transaction volumes grow past ~10k per user.
+     * Switch to a chunked Pageable loop writing directly to HttpServletResponse.getOutputStream()
+     * rather than accumulating the full CSV in heap.
+     */
+    @Query("SELECT t FROM Transaction t JOIN FETCH t.category " +
+           "WHERE t.userId = :userId AND t.isDeleted = false " +
+           "ORDER BY t.txDate DESC")
+    List<Transaction> findAllByUserIdAndIsDeletedFalseOrderByTxDateDesc(
+            @Param("userId") Long userId);
 }
