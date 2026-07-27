@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface GoalRepository extends JpaRepository<Goal, Long> {
 
-    List<Goal> findByUserId(Long userId);
+    List<Goal> findTop50ByUserIdOrderByCreatedAtDesc(Long userId);
 
     Optional<Goal> findByIdAndUserId(Long id, Long userId);
 

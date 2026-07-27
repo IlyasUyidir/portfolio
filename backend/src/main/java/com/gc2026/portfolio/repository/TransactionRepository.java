@@ -18,6 +18,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
 
     Optional<Transaction> findByIdAndUserIdAndIsDeletedFalse(Long id, Long userId);
 
+    @Override
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"category"})
+    org.springframework.data.domain.Page<Transaction> findAll(org.springframework.data.jpa.domain.Specification<Transaction> spec, org.springframework.data.domain.Pageable pageable);
+
     /**
      * C-2: Was existsByCategoryId — which included soft-deleted transactions,
      * permanently blocking users from deleting categories after soft-deleting all transactions.
@@ -48,6 +52,24 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     Long sumAmountByTypeAndDateRange(
             @Param("userId") Long userId,
             @Param("type") TransactionType type,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
+    interface IncomeExpenseProjection {
+        Long getIncome();
+        Long getExpenses();
+    }
+
+    @Query("SELECT " +
+           "COALESCE(SUM(CASE WHEN t.type = 'REVENU' THEN t.amount ELSE 0 END), 0) as income, " +
+           "COALESCE(SUM(CASE WHEN t.type = 'DEPENSE' THEN t.amount ELSE 0 END), 0) as expenses " +
+           "FROM Transaction t " +
+           "WHERE t.userId = :userId " +
+           "AND t.txDate >= :startDate " +
+           "AND t.txDate <= :endDate " +
+           "AND t.isDeleted = false")
+    IncomeExpenseProjection getIncomeAndExpenses(
+            @Param("userId") Long userId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 

@@ -26,15 +26,13 @@ public class DashboardService {
         LocalDate startDate = month.atDay(1);
         LocalDate endDate = month.atEndOfMonth();
 
-        // 1. Fetch raw Object Longs (which might be null)
-        Long rawIncome = transactionRepository.sumAmountByTypeAndDateRange(userId, TransactionType.REVENU, startDate,
-                endDate);
-        Long rawExpenses = transactionRepository.sumAmountByTypeAndDateRange(userId, TransactionType.DEPENSE, startDate,
-                endDate);
+        // 1. Fetch combined income and expenses in a single query (N-4 fix)
+        TransactionRepository.IncomeExpenseProjection projection = 
+                transactionRepository.getIncomeAndExpenses(userId, startDate, endDate);
 
-        // 2. Safely unbox into primitive longs (guaranteed never to be null)
-        long totalIncome = (rawIncome != null) ? rawIncome : 0L;
-        long totalExpenses = (rawExpenses != null) ? rawExpenses : 0L;
+        // 2. Safely unbox into primitive longs (guaranteed never to be null by COALESCE)
+        long totalIncome = (projection.getIncome() != null) ? projection.getIncome() : 0L;
+        long totalExpenses = (projection.getExpenses() != null) ? projection.getExpenses() : 0L;
 
         // 3. Math is now 100% safe
         long monthlyBalance = totalIncome - totalExpenses;
