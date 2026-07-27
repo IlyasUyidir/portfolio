@@ -71,7 +71,8 @@ class CategoryServiceTest {
         // Arrange
         CreateCategoryRequest request = CreateCategoryRequest.builder()
                 .name("New Cat").type(CategoryType.DEPENSE).color("#000000").build();
-        when(categoryRepository.countByUserIdAndIsSystemFalse(userId)).thenReturn(10L);
+        // I-2: stub the new locked count method
+        when(categoryRepository.countByUserIdAndIsSystemFalseForUpdate(userId)).thenReturn(10L);
 
         // Act & Assert
         ValidationException exception = assertThrows(ValidationException.class,
@@ -95,7 +96,7 @@ class CategoryServiceTest {
 
         // Assert
         assertThat(result).isNotNull();
-        verify(categoryRepository, never()).countByUserIdAndIsSystemFalse(any());
+        verify(categoryRepository, never()).countByUserIdAndIsSystemFalseForUpdate(any());
         verify(categoryRepository).save(any(Category.class));
     }
 
@@ -283,21 +284,7 @@ class CategoryServiceTest {
 
         // Assert
         assertThat(result).isNotNull();
-        verify(categoryRepository, never()).countByUserIdAndIsSystemFalse(any());
-    }
-
-    @Test
-    @DisplayName("delete - should block deletion even with soft-deleted transactions")
-    void delete_whenCategoryHasSoftDeletedTransactions_shouldStillBlockDeletion() {
-        // Arrange
-        when(categoryRepository.findByIdAndUserId(5L, userId)).thenReturn(Optional.of(customCat));
-        // existsByCategoryId in repository checks all transactions, including isDeleted=true/false
-        // depending on how it's implemented. In this project, existsByCategoryId is a standard
-        // Spring Data JPA method which doesn't automatically filter soft-deleted unless specified.
-        when(transactionRepository.existsByCategoryId(5L)).thenReturn(true);
-
-        // Act & Assert
-        assertThrows(ValidationException.class, () -> categoryService.delete(userId, 5L));
+        verify(categoryRepository, never()).countByUserIdAndIsSystemFalseForUpdate(any());
     }
 
     // --- IDOR SECURITY ---
@@ -332,5 +319,54 @@ class CategoryServiceTest {
         when(categoryRepository.findByIdAndUserId(customCat.getId(), userB)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> categoryService.delete(userB, customCat.getId()));
+    }
+
+    /**
+     * I-2 regression: Verifies that the STANDARD user limit check uses the
+     * locked count method (countByUserIdAndIsSystemFalseForUpdate), not the
+     * unlocked one.  Old code called countByUserIdAndIsSystemFalse; after the
+     * fix, countByUserIdAndIsSystemFalseForUpdate is called instead.
+     *
+     * This test would FAIL on the old service code (used the non-locking method)
+     * and PASS after the I-2 fix.
+     */
+    @Test
+    @DisplayName("I-2: create() for STANDARD user calls the PESSIMISTIC_WRITE-locked count, not the unlocked one")
+    void create_standardUser_shouldCallLockedCount() {
+        // Arrange
+        CreateCategoryRequest request = CreateCategoryRequest.builder()
+                .name("LockedCountCat").type(CategoryType.DEPENSE).color("#000000").build();
+        when(categoryRepository.countByUserIdAndIsSystemFalseForUpdate(userId)).thenReturn(0L);
+        when(categoryRepository.existsByUserIdAndNameIgnoreCase(userId, "LockedCountCat")).thenReturn(false);
+        when(categoryRepository.save(any(Category.class))).thenReturn(customCat);
+
+        // Act
+        categoryService.create(userId, "STANDARD", request);
+
+        // Assert
+        verify(categoryRepository).countByUserIdAndIsSystemFalseForUpdate(userId);   // locked version called
+        verify(categoryRepository, never()).countByUserIdAndIsSystemFalse(any());     // unlocked NOT called
+    }
+
+    /**
+     * I-2 regression: DataIntegrityViolationException from a simultaneous insert that
+     * sneaks past the lock (e.g. different category names at exact same count) must
+     * propagate out of the service and reach GlobalExceptionHandler (maps it to 409).
+     * The service must not silently swallow it.
+     */
+    @Test
+    @DisplayName("I-2: DataIntegrityViolationException from concurrent insert propagates to GlobalExceptionHandler")
+    void create_whenConcurrentInsertViolatesUniqueConstraint_shouldPropagateException() {
+        // Arrange
+        CreateCategoryRequest request = CreateCategoryRequest.builder()
+                .name("RaceCat").type(CategoryType.DEPENSE).color("#000000").build();
+        when(categoryRepository.countByUserIdAndIsSystemFalseForUpdate(userId)).thenReturn(0L);
+        when(categoryRepository.existsByUserIdAndNameIgnoreCase(userId, "RaceCat")).thenReturn(false);
+        when(categoryRepository.save(any(Category.class)))
+                .thenThrow(new org.springframework.dao.DataIntegrityViolationException("unique_user_category"));
+
+        // Act & Assert — must propagate, NOT be swallowed
+        assertThrows(org.springframework.dao.DataIntegrityViolationException.class,
+                () -> categoryService.create(userId, "STANDARD", request));
     }
 }

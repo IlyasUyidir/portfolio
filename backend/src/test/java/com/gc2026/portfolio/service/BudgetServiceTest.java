@@ -397,4 +397,35 @@ class BudgetServiceTest {
 
         assertThrows(ResourceNotFoundException.class, () -> budgetService.createOrUpdate(userB, validRequest));
     }
+
+    /**
+     * C-3 regression: When the budget upsert race window survives the PESSIMISTIC_WRITE lock
+     * (e.g., two threads started within the same gap before the lock was taken), the DB unique
+     * constraint fires and Spring wraps it in DataIntegrityViolationException.
+     *
+     * The service must NOT catch this — it must propagate to GlobalExceptionHandler which maps it
+     * to 409. This test verifies the service layer is not accidentally swallowing it.
+     *
+     * Old code: DataIntegrityViolationException fell through to the generic Exception handler
+     * → 500.  After the Batch 1 handler is in place, the same propagation now yields 409.
+     *
+     * This test would have PASSED on old service code but the overall HTTP response was 500.
+     * It now documents the expected propagation contract at the service layer.
+     */
+    @Test
+    @DisplayName("C-3: DataIntegrityViolationException from save() propagates uncaught (GlobalExceptionHandler maps it to 409)")
+    void createOrUpdate_whenRaceConditionCausesUniqueConstraintViolation_shouldPropagateDataIntegrityException() {
+        // Arrange — both threads see Optional.empty() (race window)
+        when(categoryRepository.findByIdAndUserIdOrSystem(validRequest.getCategoryId(), userId))
+                .thenReturn(Optional.of(cat));
+        when(budgetRepository.findByUserIdAndCategoryIdAndBudgetYearAndBudgetMonth(
+                anyLong(), anyLong(), anyInt(), anyInt()))
+                .thenReturn(Optional.empty()); // Both threads see empty
+        when(budgetRepository.save(any(Budget.class)))
+                .thenThrow(new org.springframework.dao.DataIntegrityViolationException("unique_budget constraint"));
+
+        // Act & Assert — the exception must propagate to be caught by GlobalExceptionHandler
+        assertThrows(org.springframework.dao.DataIntegrityViolationException.class,
+                () -> budgetService.createOrUpdate(userId, validRequest));
+    }
 }
