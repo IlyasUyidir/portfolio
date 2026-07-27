@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.OptimisticLockException;
+
 @Service
 @RequiredArgsConstructor
 public class GoalService {
@@ -85,7 +87,16 @@ public class GoalService {
             goal.setStatus(GoalStatus.EN_COURS);
         }
 
-        goal = goalRepository.save(goal);
+        try {
+            goal = goalRepository.save(goal);
+        } catch (OptimisticLockException ex) {
+            // C-1: Two concurrent contributions read the same @Version value.
+            // Surface a clean 409 rather than a 500. The client should retry
+            // the contribution — we do not retry here because contributions are
+            // not idempotent and the client is better positioned to decide.
+            throw new ValidationException(
+                    "Goal was modified concurrently — please retry your contribution");
+        }
         return mapToResponse(goal);
     }
 

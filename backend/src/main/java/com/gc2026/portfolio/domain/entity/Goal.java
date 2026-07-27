@@ -2,6 +2,7 @@ package com.gc2026.portfolio.domain.entity;
 
 import com.gc2026.portfolio.domain.enums.GoalStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,6 +20,16 @@ public class Goal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * C-1: Optimistic lock version. Hibernate automatically increments this on
+     * every UPDATE. If two concurrent addContribution() transactions both load
+     * the same version, the second save will throw OptimisticLockException.
+     * GoalService catches that and maps it to a clean 409.
+     */
+    @Version
+    @Column(name = "version")
+    private Long version;
+
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
@@ -26,6 +37,7 @@ public class Goal {
     private String title;
 
     @Column(name = "target_amount", nullable = false)
+    @Positive(message = "Goal target amount must be positive")
     private Long targetAmount;
 
     @Column(name = "current_amount")

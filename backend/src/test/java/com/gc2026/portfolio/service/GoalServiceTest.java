@@ -455,4 +455,38 @@ class GoalServiceTest {
             assertThrows(ResourceNotFoundException.class, () -> goalService.deleteGoal(userB, activeGoal.getId()));
         }
     }
+
+    @Nested
+    @DisplayName("C-1 Optimistic Locking Regression Tests")
+    class OptimisticLockingRegressionTests {
+
+        /**
+         * C-1 regression: When two concurrent threads both load the same @Version value
+         * and the second one commits, goalRepository.save() throws OptimisticLockException.
+         *
+         * Old code: the exception propagated to the catch-all handler → 500.
+         * New code: the exception is caught and wrapped in ValidationException → 409.
+         *
+         * This test would FAIL on the old GoalService (OptimisticLockException unhandled)
+         * and PASS after the C-1 fix.
+         */
+        @Test
+        @DisplayName("C-1: OptimisticLockException on save() is caught and mapped to ValidationException")
+        void addContribution_whenOptimisticLockExceptionThrown_shouldThrowValidationException() {
+            // Arrange
+            ContributeRequest request = new ContributeRequest();
+            request.setAmount(50000L);
+            when(goalRepository.findByIdAndUserId(activeGoal.getId(), userId))
+                    .thenReturn(Optional.of(activeGoal));
+            // Simulate the second concurrent write finding a stale version
+            when(goalRepository.save(any(Goal.class)))
+                    .thenThrow(new jakarta.persistence.OptimisticLockException("Stale version"));
+
+            // Act & Assert
+            ValidationException ex = assertThrows(ValidationException.class,
+                    () -> goalService.addContribution(userId, activeGoal.getId(), request));
+
+            assertThat(ex.getMessage()).contains("concurrently");
+        }
+    }
 }

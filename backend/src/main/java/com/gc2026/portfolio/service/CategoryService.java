@@ -36,7 +36,9 @@ public class CategoryService {
     public CategoryResponse create(Long userId, String userRole, CreateCategoryRequest dto) {
         // Limit enforcement: Standard users max 10 custom categories
         if ("STANDARD".equals(userRole)) {
-            long customCount = categoryRepository.countByUserIdAndIsSystemFalse(userId);
+            // I-2: Use the PESSIMISTIC_WRITE-locked count to serialise concurrent inserts
+            // for the same user, preventing limit bypass via count-then-create race.
+            long customCount = categoryRepository.countByUserIdAndIsSystemFalseForUpdate(userId);
             if (customCount >= STANDARD_CATEGORY_LIMIT) {
                 throw new ValidationException(
                         "Standard users are limited to " + STANDARD_CATEGORY_LIMIT + " custom categories");
@@ -93,7 +95,8 @@ public class CategoryService {
             throw new ValidationException("System categories cannot be deleted");
         }
 
-        // Check for existing transactions (including soft-deleted)
+        // C-2: Use existsByCategoryId (not existsByCategoryId) so that
+        // categories whose transactions are all soft-deleted can be deleted correctly.
         if (transactionRepository.existsByCategoryId(catId)) {
             throw new ValidationException("Cannot delete category with existing transactions");
         }
