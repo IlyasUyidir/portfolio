@@ -293,8 +293,9 @@ class CategoryControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("7. update_whenSystemCategory_shouldReturn400")
-    void update_whenSystemCategory_shouldReturn400() throws Exception {
+    // I-5: ValidationException (business-rule violation) → 409 Conflict, not 400.
+    @DisplayName("7. update_whenSystemCategory_shouldReturn409")
+    void update_whenSystemCategory_shouldReturn409() throws Exception {
         // Arrange
         UpdateCategoryRequest request = UpdateCategoryRequest.builder()
                 .name("System")
@@ -309,7 +310,7 @@ class CategoryControllerTest {
                         .requestAttr("userId", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict());  // 409 — was 400 before I-5 fix
     }
 
     // --- DELETE /api/v1/categories/{id} ---
@@ -327,8 +328,9 @@ class CategoryControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("9. delete_whenCategoryHasTransactions_shouldReturn400")
-    void delete_whenCategoryHasTransactions_shouldReturn400() throws Exception {
+    // I-5: ValidationException (business-rule violation) → 409 Conflict, not 400.
+    @DisplayName("9. delete_whenCategoryHasTransactions_shouldReturn409")
+    void delete_whenCategoryHasTransactions_shouldReturn409() throws Exception {
         // Arrange
         org.mockito.Mockito.doThrow(new ValidationException("Cannot delete category with existing transactions"))
                 .when(categoryService).delete(any(), any());
@@ -336,6 +338,6 @@ class CategoryControllerTest {
         // Act & Assert
         mockMvc.perform(delete("/api/v1/categories/5")
                         .requestAttr("userId", 1L))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict());  // 409 — was 400 before I-5 fix
     }
 }

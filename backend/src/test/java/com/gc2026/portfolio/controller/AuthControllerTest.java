@@ -180,7 +180,8 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").value("BUSINESS_RULE_VIOLATION"))
                 .andExpect(jsonPath("$.error").value("Email is already registered"));
     }
 
