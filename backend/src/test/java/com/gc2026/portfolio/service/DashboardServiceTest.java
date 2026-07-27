@@ -50,10 +50,10 @@ class DashboardServiceTest {
     @Test
     void getKpis_whenNullIncome_shouldDefaultToZero() {
         // Arrange
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.REVENU), any(), any()))
-                .thenReturn(null);
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.DEPENSE), any(), any()))
-                .thenReturn(50000L);
+        TransactionRepository.IncomeExpenseProjection proj = mock(TransactionRepository.IncomeExpenseProjection.class);
+        when(proj.getIncome()).thenReturn(null);
+        when(proj.getExpenses()).thenReturn(50000L);
+        when(transactionRepository.getIncomeAndExpenses(any(), any(), any())).thenReturn(proj);
 
         // Act
         DashboardKpiResponse result = dashboardService.getKpis(userId, month);
@@ -68,10 +68,10 @@ class DashboardServiceTest {
     @Test
     void getKpis_whenNullExpenses_shouldDefaultToZero() {
         // Arrange
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.REVENU), any(), any()))
-                .thenReturn(100000L);
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.DEPENSE), any(), any()))
-                .thenReturn(null);
+        TransactionRepository.IncomeExpenseProjection proj = mock(TransactionRepository.IncomeExpenseProjection.class);
+        when(proj.getIncome()).thenReturn(100000L);
+        when(proj.getExpenses()).thenReturn(null);
+        when(transactionRepository.getIncomeAndExpenses(any(), any(), any())).thenReturn(proj);
 
         // Act
         DashboardKpiResponse result = dashboardService.getKpis(userId, month);
@@ -86,10 +86,10 @@ class DashboardServiceTest {
     @Test
     void getKpis_shouldCalculateMonthlyBalanceCorrectly() {
         // Arrange
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.REVENU), eq(startDate), eq(endDate)))
-                .thenReturn(200000L);
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.DEPENSE), eq(startDate), eq(endDate)))
-                .thenReturn(150000L);
+        TransactionRepository.IncomeExpenseProjection proj = mock(TransactionRepository.IncomeExpenseProjection.class);
+        when(proj.getIncome()).thenReturn(200000L);
+        when(proj.getExpenses()).thenReturn(150000L);
+        when(transactionRepository.getIncomeAndExpenses(eq(userId), eq(startDate), eq(endDate))).thenReturn(proj);
 
         // Act
         DashboardKpiResponse result = dashboardService.getKpis(userId, month);
@@ -101,10 +101,10 @@ class DashboardServiceTest {
     @Test
     void getKpis_whenExpensesExceedIncome_monthlyBalanceShouldBeNegative() {
         // Arrange
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.REVENU), any(), any()))
-                .thenReturn(100000L);
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.DEPENSE), any(), any()))
-                .thenReturn(150000L);
+        TransactionRepository.IncomeExpenseProjection proj = mock(TransactionRepository.IncomeExpenseProjection.class);
+        when(proj.getIncome()).thenReturn(100000L);
+        when(proj.getExpenses()).thenReturn(150000L);
+        when(transactionRepository.getIncomeAndExpenses(any(), any(), any())).thenReturn(proj);
 
         // Act
         DashboardKpiResponse result = dashboardService.getKpis(userId, month);
@@ -117,10 +117,10 @@ class DashboardServiceTest {
     @Test
     void getKpis_shouldCalculateSavingsRateCorrectly() {
         // Arrange
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.REVENU), any(), any()))
-                .thenReturn(200000L);
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.DEPENSE), any(), any()))
-                .thenReturn(100000L);
+        TransactionRepository.IncomeExpenseProjection proj = mock(TransactionRepository.IncomeExpenseProjection.class);
+        when(proj.getIncome()).thenReturn(200000L);
+        when(proj.getExpenses()).thenReturn(100000L);
+        when(transactionRepository.getIncomeAndExpenses(any(), any(), any())).thenReturn(proj);
 
         // Act
         DashboardKpiResponse result = dashboardService.getKpis(userId, month);
@@ -132,10 +132,10 @@ class DashboardServiceTest {
     @Test
     void getKpis_whenIncomeIsZero_savingsRateShouldBeZero() {
         // Arrange
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.REVENU), any(), any()))
-                .thenReturn(0L);
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.DEPENSE), any(), any()))
-                .thenReturn(50000L);
+        TransactionRepository.IncomeExpenseProjection proj = mock(TransactionRepository.IncomeExpenseProjection.class);
+        when(proj.getIncome()).thenReturn(0L);
+        when(proj.getExpenses()).thenReturn(50000L);
+        when(transactionRepository.getIncomeAndExpenses(any(), any(), any())).thenReturn(proj);
 
         // Act
         DashboardKpiResponse result = dashboardService.getKpis(userId, month);
@@ -147,10 +147,10 @@ class DashboardServiceTest {
     @Test
     void getKpis_whenSavingsRateIsNegative_shouldClampToZero() {
         // Arrange
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.REVENU), any(), any()))
-                .thenReturn(100000L);
-        when(transactionRepository.sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.DEPENSE), any(), any()))
-                .thenReturn(200000L);
+        TransactionRepository.IncomeExpenseProjection proj = mock(TransactionRepository.IncomeExpenseProjection.class);
+        when(proj.getIncome()).thenReturn(100000L);
+        when(proj.getExpenses()).thenReturn(200000L);
+        when(transactionRepository.getIncomeAndExpenses(any(), any(), any())).thenReturn(proj);
 
         // Act
         DashboardKpiResponse result = dashboardService.getKpis(userId, month);
@@ -166,14 +166,16 @@ class DashboardServiceTest {
         LocalDate expectedStart = LocalDate.of(2026, 5, 1);
         LocalDate expectedEnd = LocalDate.of(2026, 5, 31);
 
-        when(transactionRepository.sumAmountByTypeAndDateRange(any(), any(), any(), any())).thenReturn(0L);
+        TransactionRepository.IncomeExpenseProjection proj = mock(TransactionRepository.IncomeExpenseProjection.class);
+        when(proj.getIncome()).thenReturn(0L);
+        when(proj.getExpenses()).thenReturn(0L);
+        when(transactionRepository.getIncomeAndExpenses(any(), any(), any())).thenReturn(proj);
 
         // Act
         dashboardService.getKpis(userId, specificMonth);
 
         // Assert
-        verify(transactionRepository, times(1)).sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.REVENU), eq(expectedStart), eq(expectedEnd));
-        verify(transactionRepository, times(1)).sumAmountByTypeAndDateRange(eq(userId), eq(TransactionType.DEPENSE), eq(expectedStart), eq(expectedEnd));
+        verify(transactionRepository, times(1)).getIncomeAndExpenses(eq(userId), eq(expectedStart), eq(expectedEnd));
     }
 
     // --- GET SPENDING ---

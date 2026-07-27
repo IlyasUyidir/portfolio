@@ -54,7 +54,7 @@ public class GoalService {
 
     @Transactional(readOnly = true)
     public List<GoalResponse> getUserGoals(Long userId) {
-        return goalRepository.findByUserId(userId)
+        return goalRepository.findTop50ByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
