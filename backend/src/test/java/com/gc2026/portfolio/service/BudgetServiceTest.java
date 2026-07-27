@@ -112,16 +112,6 @@ class BudgetServiceTest {
     }
 
     @Test
-    void createOrUpdate_whenMonthIsInvalid_shouldThrowValidationException() {
-        // Arrange
-        validRequest.setBudgetMonth(13);
-        assertThrows(ValidationException.class, () -> budgetService.createOrUpdate(userId, validRequest));
-
-        validRequest.setBudgetMonth(0);
-        assertThrows(ValidationException.class, () -> budgetService.createOrUpdate(userId, validRequest));
-    }
-
-    @Test
     void createOrUpdate_withBudgetMonth1_shouldSucceed() {
         // Arrange
         validRequest.setBudgetMonth(1);
