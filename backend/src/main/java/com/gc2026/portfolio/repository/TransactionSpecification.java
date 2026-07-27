@@ -2,6 +2,8 @@ package com.gc2026.portfolio.repository;
 
 import com.gc2026.portfolio.domain.entity.Transaction;
 import com.gc2026.portfolio.domain.enums.TransactionType;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
@@ -30,7 +32,7 @@ public final class TransactionSpecification {
                 .and(hasStartDate(startDate))
                 .and(hasEndDate(endDate))
                 .and(hasType(type))
-                .and(hasCategoryId(categoryId))
+                .and(hasCategoryId(categoryId, userId))   // I-3: pass userId for ownership check
                 .and(titleContains(keyword));
     }
 
@@ -57,9 +59,35 @@ public final class TransactionSpecification {
         return (root, query, cb) -> cb.equal(root.get("type"), type);
     }
 
-    private static Specification<Transaction> hasCategoryId(Long categoryId) {
+    /**
+     * I-3: Category ownership check added.
+     *
+     * Old predicate: WHERE t.category_id = :categoryId
+     * — allowed probing arbitrary category IDs to detect their existence system-wide.
+     *
+     * New predicate: WHERE t.category_id = :categoryId
+     *               AND (t.category.userId = :userId OR t.category.isSystem = true)
+     * — A user can only filter by categories they own or system categories.
+     *   Filtering by another user's category ID now returns an empty result (not an error),
+     *   which is the correct information-safe behavior per the synthesis report.
+     *
+     * Note: The Criteria API join is added only when categoryId is non-null, so there is
+     * no performance impact on queries that don't filter by category.
+     */
+    private static Specification<Transaction> hasCategoryId(Long categoryId, Long userId) {
         if (categoryId == null) return null;
-        return (root, query, cb) -> cb.equal(root.get("category").get("id"), categoryId);
+        return (root, query, cb) -> {
+            // Use a LEFT JOIN to the category table so the ownership predicate can be applied.
+            // This is safe because isNotDeleted() and hasUserId() already constrain the result set.
+            Join<Object, Object> category = root.join("category", JoinType.LEFT);
+            return cb.and(
+                    cb.equal(category.get("id"), categoryId),
+                    cb.or(
+                            cb.equal(category.get("userId"), userId),
+                            cb.equal(category.get("isSystem"), true)
+                    )
+            );
+        };
     }
 
     private static Specification<Transaction> titleContains(String keyword) {

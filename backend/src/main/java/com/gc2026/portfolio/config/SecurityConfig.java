@@ -30,7 +30,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll()
+                // N-1: Fail-safe default — deny anything not explicitly permitted above.
+                // Previously was permitAll() which would have exposed any future non-/api/**
+                // route (Actuator endpoints, static resources, etc.) publicly by default.
+                // If CI surfaces a broken route after this change, add an explicit rule here.
+                .anyRequest().denyAll()
             )
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint(new org.springframework.security.web.authentication.HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED))
