@@ -1,6 +1,12 @@
 folio-ilyas.duckdns.org {
   handle /api/* {
-    reverse_proxy backend:8080
+    reverse_proxy {
+      dynamic a {
+        name backend
+        port 8080
+      }
+      lb_policy round_robin
+    }
   }
 
   handle /grafana/* {
