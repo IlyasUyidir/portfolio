@@ -17,18 +17,18 @@ services:
 
   backend:
     image: ghcr.io/${GHCR_REPO}/folio-backend:${BACKEND_IMAGE_TAG:-latest}
-    container_name: portfolio-backend
     restart: unless-stopped
     expose:
       - "8080"
       - "8081"
     depends_on:
-      postgres:
+      pgbouncer:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/portfolio_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pgbouncer:5432/portfolio_db
       SPRING_DATASOURCE_USERNAME: portfolio_user
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "5"
       JWT_SECRET: ${JWT_SECRET}
       APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS}
 
@@ -58,6 +58,31 @@ services:
         condition: service_healthy
       frontend:
         condition: service_started
+  
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: portfolio-pgbouncer
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: portfolio_user
+      DB_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      DB_NAME: portfolio_db
+      POOL_MODE: session
+      MAX_CLIENT_CONN: 100
+      DEFAULT_POOL_SIZE: 20
+      AUTH_TYPE: scram-sha-256
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "5432", "-U", "portfolio_user", "-d", "portfolio_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    expose:
+      - "5432"
 
 volumes:
   postgres_data:
