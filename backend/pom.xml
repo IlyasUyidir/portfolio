@@ -29,6 +29,9 @@
 	<properties>
 		<java.version>17</java.version>
 		<spring-framework.version>6.2.19</spring-framework.version>
+		<tomcat.version>10.1.55</tomcat.version>
+		<postgresql.version>42.7.12</postgresql.version>
+		<jackson-bom.version>2.18.8</jackson-bom.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
