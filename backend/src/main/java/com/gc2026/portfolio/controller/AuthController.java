@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Map;
 
@@ -23,6 +24,9 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+
+    @Value("${app.cookie.secure:true}")
+    private boolean cookieSecure;
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletResponse response) {
@@ -48,7 +52,7 @@ public class AuthController {
         // Clear cookie
         ResponseCookie cookie = ResponseCookie.from("auth_token", "")
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieSecure)
                 .path("/")
                 .maxAge(0)
                 .sameSite("Lax")
@@ -68,7 +72,7 @@ public class AuthController {
     private void setTokenCookie(HttpServletResponse response, String token) {
         ResponseCookie cookie = ResponseCookie.from("auth_token", token)
                 .httpOnly(true)
-                .secure(true) // Should be true in production (HTTPS)
+                .secure(cookieSecure)
                 .path("/")
                 .maxAge(86400) // 1 day
                 .sameSite("Lax")

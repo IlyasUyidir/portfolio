@@ -38,6 +38,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=portfolio_user
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
+      - APP_COOKIE_SECURE=false
 
   # ──────────────────────────────────────────────
   # 3. React/Nginx Frontend

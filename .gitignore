@@ -28,3 +28,5 @@ terraform-folio/terraform.tfvars
 terraform.tfvars
 .terraform/
 *.pem
+audit-out/
+audit.sh
