@@ -26,26 +26,14 @@ public final class TransactionSpecification {
             Long categoryId,
             String keyword) {
 
-        Specification<Transaction> spec = Specification.where(hasUserId(userId))
-                .and(isNotDeleted());
-
-        if (startDate != null) {
-            spec = spec.and(hasStartDate(startDate));
-        }
-        if (endDate != null) {
-            spec = spec.and(hasEndDate(endDate));
-        }
-        if (type != null) {
-            spec = spec.and(hasType(type));
-        }
-        if (categoryId != null) {
-            spec = spec.and(hasCategoryId(categoryId, userId));
-        }
-        if (keyword != null && !keyword.isBlank()) {
-            spec = spec.and(titleContains(keyword));
-        }
-
-        return spec;
+        return Specification
+                .where(hasUserId(userId))
+                .and(isNotDeleted())
+                .and(hasStartDate(startDate))
+                .and(hasEndDate(endDate))
+                .and(hasType(type))
+                .and(hasCategoryId(categoryId, userId))   // I-3: pass userId for ownership check
+                .and(titleContains(keyword));
     }
 
     private static Specification<Transaction> hasUserId(Long userId) {

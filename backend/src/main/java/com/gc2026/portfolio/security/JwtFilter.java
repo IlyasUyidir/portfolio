@@ -50,10 +50,7 @@ public class JwtFilter extends OncePerRequestFilter {
                                 List.of(new SimpleGrantedAuthority("ROLE_" + role))
                         );
 
-                org.springframework.security.core.context.SecurityContext context =
-                        SecurityContextHolder.createEmptyContext();
-                context.setAuthentication(authentication);
-                SecurityContextHolder.setContext(context);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 // Store userId and role as request attributes for downstream controllers/services
                 request.setAttribute("userId", userId);
