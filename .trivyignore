@@ -4,3 +4,8 @@ CVE-2026-41695
 CVE-2026-41716
 CVE-2026-22732
 CVE-2026-40984
+
+# spring-webmvc: XsltView RCE and SSE-with-views stream corruption.
+# Fix exists only in Framework 7.x (Boot 4); XsltView is not used in this backend.
+CVE-2026-47884
+CVE-2026-47890
